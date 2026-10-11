@@ -95,13 +95,17 @@ yang di `Code/` dianggap arsip kerja.
 
 ## 7. Unduhan data mentah (untuk handoff)
 
-Repo git sengaja **tidak** memuat data mentah yang besar. Unduh lewat tautan berikut,
-lalu taruh isinya sesuai kolom "nama di repo" di atas.
+Repo git sengaja **tidak** memuat data mentah yang besar.
+
+**Tautan Google Drive:** https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing
+
+(folder bernama `raw`, berisi seluruh isi `data/raw/`). Unduh, lalu taruh isinya sesuai
+kolom "nama di repo" di atas.
 
 | Paket | Isi | Ukuran | Tautan |
 |---|---|---|---|
-| Video lintasan | 5 folder `video_*` (37 berkas) | 1.7 GB | _isi tautan Google Drive di sini_ |
-| Citra + CSV mentah | `camera_calibration/`, `linear_*`, `measurement_error/`, `circular_*` | 183 MB | _isi tautan di sini bila tidak ikut git_ |
+| Video lintasan | 5 folder `video_*` (37 berkas) | 1.7 GB | [https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing](https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing) |
+| Citra + CSV mentah | `camera_calibration/`, `linear_*`, `measurement_error/`, `circular_*` | 183 MB | termasuk folder Drive di atas |
 
 **Cara memakai:** unduh, ekstrak, lalu letakkan isinya **langsung di dalam** `data/raw/`
 sehingga strukturnya menjadi `data/raw/linear_baseline_x/...`,
