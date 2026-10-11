@@ -50,6 +50,24 @@ and the **travel distance reduced to 0.5 mm** (not 10 mm).
 > of the dial gauge used to compute the measurement error. The comparison result numbers
 > are in `data/processed/measurement_error/dial_vs_ve.csv`.
 
+### 3.1 Environmental noise (static capture) - RECOVERED from the working archive
+
+The machine was **not commanded to move**: 24 stills (`calib_0000.png` .. `calib_0023.png`) were
+taken at one fixed position and processed with the same detection code as the linear test. With
+zero commanded travel, whatever delta remains is environmental noise. The paper figure
+`figures/paper/environmental_noise_with_std.png` uses 10 of these 24 stills.
+
+| Name in repo | Original name | Contents | Files | Size | Git |
+|---|---|---|---|---|---|
+| `noise_static_capture/` | `SEMPRO/Code/ARSIP/pengujian_noise_fix_banget/kalibrasi` | static-capture stills `calib_0000.png`..`calib_0023.png` (**photos only, no video** - the `video/` subfolder is empty by design) | 24 | 4.2 MB | no |
+
+> This dataset existed only inside the working archive `SEMPRO/Code/ARSIP/`; it was copied into
+> `data/raw/noise_static_capture/` so that it is not lost.
+> `07_paper_figures/verify_environmental_noise.py` reproduces the figure values from it (all 10
+> pairs match to 0.00 um). The pair list uses `calib_0019.png` twice, so the figure's 10 points
+> come from 9 distinct stills - see `docs/03_results_and_data_locations.md` section 6.4.
+
+
 ## 4. Ellipse path (circular)
 
 | Name in repo | Original name | Contents | Size | Git |
@@ -105,7 +123,7 @@ the "name in repo" column above.
 | Package | Contents | Size | Link |
 |---|---|---|---|
 | Path videos | 5 `video_*` folders (37 files) | 1.7 GB | [https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing](https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing) |
-| Images + raw CSV | `camera_calibration/`, `linear_*`, `measurement_error/`, `circular_*` | 183 MB | included in the Drive folder above |
+| Images + raw CSV | `camera_calibration/`, `linear_*`, `measurement_error/`, `noise_static_capture/` (24 stills), `circular_*` | 187 MB | included in the Drive folder above |
 
 **How to use:** download, extract, then place the contents **directly inside** `data/raw/`
 so that the structure becomes `data/raw/linear_baseline_x/...`,

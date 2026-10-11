@@ -173,7 +173,7 @@ with the reference measuring instrument.
 | `data/processed/measurement_error/dial_vs_ve.csv` | 20 rows: axis, frame, iteration, dial_um, dial_err_um, ve_um, abs_diff_um |
 | `data/raw/measurement_error/x_dial_gauge/` | 15 dial gauge photos of the X axis (`orix/fwd/bck` 1-5) + 3 visualization images |
 | `data/raw/measurement_error/y_dial_gauge/` | 15 dial gauge photos of the Y axis (`oriy/fwd/bck` 1-5) + 3 visualization images |
-| `figures/1_4_position_comparison_combined.png` | manuscript figure, 4 panels |
+| `figures/paper/1_4_position_comparison_combined.png` | manuscript figure, 4 panels |
 
 ---
 
@@ -243,3 +243,57 @@ The intrinsic matrix `K` and distortion coefficients `D` have never been saved a
 only printed on screen. The split notebook
 (`01_camera_calibration/camera_calibration.ipynb`) now exports them to
 `output/camera_params.npz` so they can be referenced and used by the machine calibration notebook.
+
+## 6. Data-consistency verification (carried out while preparing this repo)
+
+Everything below was checked by **re-running the code**, not by reading the documentation.
+
+### 6.1 Machine calibration — the repo reproduces the manuscript numbers
+
+| Quantity | Log / manuscript | Re-run from this repo |
+|---|---|---|
+| X travel, error | 10.0045 mm, 0.0071 mm | identical |
+| X steps/mm recommendation | `M92 X79.68` | identical |
+| Y travel, error | −10.0022 mm, 0.0054 mm | identical |
+| Y steps/mm recommendation | `M92 Y80.38` | identical |
+
+### 6.2 Trajectory evaluation — the repo reproduces the manuscript numbers
+
+Re-running the evaluation gives RMSE total 100.89 um (baseline) -> 46.17 um (calibrated), i.e. a
+54.24 % improvement, matching `tab:perbandingan_evaluasi_rmse` (100.9 um -> 46.17 um).
+
+### 6.3 The paper figures are built from the manuscript tables
+
+The data arrays hard-coded in `07_paper_figures/plot_axis_iterations.py` reproduce the thesis
+tables exactly (`bab4.tex` lines 585-597 baseline, 809-820 calibrated), and so does
+`plot_trajectory_rmse.py`. `plot_environmental_noise.py` was audited by re-deriving its values
+from the raw stills with `07_paper_figures/verify_environmental_noise.py`: all 10 pairs match to
+0.00 um.
+
+### 6.4 KNOWN INCONSISTENCY: on axis X the noise figure and the noise table disagree
+
+Both come from the same 10 deltas, but they use two different definitions:
+
+| Quantity | Manuscript table + prose (`tab:statistik_noise_lingkungan`) | Paper figure (`environmental_noise_with_std`) |
+|---|---|---|
+| X | 1.6 um (SD 2.5) | MAE 2.58 um (SD 1.49) |
+| Y | 4.9 um (SD 3.3) | MAE 4.97 um (SD 3.40) |
+
+Cause: the manuscript value is the magnitude of the mean of the **signed** deltas
+(|mean(delta)| = 1.57 um on X) with the **population** standard deviation (ddof = 0) — exactly
+what the notebook's `FIND NOISE` cell prints. The figure instead draws the mean of the
+**absolute** deltas (mean(|delta|) = 2.58 um on X) with the sample standard deviation.
+On axis Y every delta is negative, so the two definitions nearly coincide (4.94 vs 4.96 um);
+on axis X the signs are mixed, so they differ by about 1 um (65 %).
+
+Two further notes on the same experiment:
+
+- The table column is labelled "mean absolute error", but what was computed is the magnitude of
+  a signed mean — so the label does not describe the number.
+- The figure's 10 points come from **9 distinct stills**, because `calib_0019.png` appears twice
+  in the pair list of the original cell (pairs 2 and 9). This is why elements 2 and 9 of both
+  plotted arrays are identical.
+
+Nothing was changed inside `plot_environmental_noise.py`: the figure still shows exactly what was
+plotted for the manuscript. Table and figure need to be brought into agreement by the author —
+either report mean(|delta|) in the table, or relabel the table column and update the figure.

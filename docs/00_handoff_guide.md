@@ -328,7 +328,7 @@ python 06_measurement_error/plot_measurement_error.py
 
 - **Inputs:** `data/processed/measurement_error/dial_vs_ve.csv`
   (the dial gauge photos are in `data/raw/measurement_error/x_dial_gauge/` and `y_dial_gauge/`)
-- **Outputs:** `figures/1_4_position_comparison_combined.png` (+ `.pdf`) and the MAE table on screen
+- **Outputs:** `figures/paper/1_4_position_comparison_combined.png` (+ `.pdf`) and the MAE table on screen
 - **Expected result** (mean absolute difference |VE - dial|):
 
   | Panel | MAE | std |

@@ -9,7 +9,7 @@ Usage:
     python 06_measurement_error/plot_measurement_error.py
 
 Input  : data/processed/measurement_error/dial_vs_ve.csv
-Output : figures/1_4_position_comparison_combined.png (+ .pdf) and the MAE table on screen.
+Output : figures/paper/1_4_position_comparison_combined.png (+ .pdf) and the MAE table on screen.
 """
 
 import os
@@ -137,8 +137,8 @@ fig.suptitle('Dial Gauge vs. Virtual Encoder Position Comparison',
              fontweight='bold', fontsize=16)
 
 os.makedirs(CFG.FIG_DIR, exist_ok=True)
-png = os.path.join(CFG.FIG_DIR, '1_4_position_comparison_combined.png')
-pdf = os.path.join(CFG.FIG_DIR, '1_4_position_comparison_combined.pdf')
+png = os.path.join(CFG.PAPER_FIG_DIR, '1_4_position_comparison_combined.png')
+pdf = os.path.join(CFG.PAPER_FIG_DIR, '1_4_position_comparison_combined.pdf')
 fig.savefig(png, dpi=300, bbox_inches='tight')
 fig.savefig(pdf, bbox_inches='tight')
 print(f"Figure saved: {png}")

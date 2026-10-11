@@ -177,6 +177,10 @@ CSV_CALIBRATED_NAME = "JALUR_VIDEO_FINAL_3_{:02d}.csv"
 # Output figure folder for the manuscript
 FIG_DIR = os.path.join(REPO_ROOT, "figures")
 
+# Manuscript-ready figures: the exact files that are placed in the paper
+# (paper plots produced by 07_paper_figures/ and the measurement-error plot)
+PAPER_FIG_DIR = os.path.join(REPO_ROOT, "figures", "paper")
+
 # Small CSVs for the manuscript figure cells (already copied to data/processed/virtual_encoder)
 CSV_VE_DIR = os.path.join(OUTPUT_DIR, "virtual_encoder")
 CSV_NASKAH = {

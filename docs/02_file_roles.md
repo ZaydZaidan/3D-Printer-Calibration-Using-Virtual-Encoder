@@ -137,6 +137,9 @@ expressed **relative** to the initial frame.
 | 11 | `kalibrasicamera\evaluasilintasan.ipynb` | confirmed | Trajectory RMSE evaluation vs ground truth |
 | 18 | `capturedatasetpengujianfoto.py` | not used (suspected) | `oriy/fwd/bck` triplet acquisition; but the author cites `otomasikalibrasi.py` as the one used |
 | — | `After Lulus Paper/code/plotmeasurement.py` | confirmed | Dial gauge vs virtual encoder comparison (measurement error). Moved to `06_measurement_error/plot_measurement_error.py` |
+| — | `After Lulus Paper/code/plotdatabaselinedankalibrasi.py` | confirmed | Per-iteration X/Y MAE figures. Copied to `07_paper_figures/plot_axis_iterations.py`; its 12 data arrays match the thesis tables exactly |
+| — | `After Lulus Paper/code/plotdatabaselinedankalibrasitrajektori.py` | confirmed | Trajectory RMSE figures. Copied to `07_paper_figures/plot_trajectory_rmse.py`; its 9 data arrays match the thesis tables exactly |
+| — | `After Lulus Paper/code/plotnoiselingkungan.py` | confirmed | Environmental noise figure. Copied to `07_paper_figures/plot_environmental_noise.py`; values re-derived from the raw stills (`07_paper_figures/verify_environmental_noise.py`) |
 | — | `Semester 8/.../images/Hasil/Kalibrator_x`, `Kalibrator_y` | confirmed | 15 dial gauge photos per axis (5 `ori/fwd/bck` triplets) for the measurement error experiment |
 | — | 22 other files | pending | Awaiting author identification |
 

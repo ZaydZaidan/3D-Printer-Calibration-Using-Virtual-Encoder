@@ -167,17 +167,43 @@ Folder Rapih Code & Data Thesis/
 |- 04_trajectory_evaluation/trajectory_evaluation.ipynb
 |- 05_data_acquisition/                <- requires the machine and camera
 |- 06_measurement_error/plot_measurement_error.py   <- dial indicator vs virtual encoder
+|- 07_paper_figures/                <- the scripts that draw every paper figure
 |- data/
 |  |- MANIFEST.md                   <- original folder name -> repo name mapping
 |  |- raw/                          <- raw data + video (1.9 GB, NOT in git)
 |  \- processed/                    <- output of each stage (in git)
-|- figures/                         <- figures for the manuscript
+|- figures/                         <- per-trial evaluation plots
+|  \- paper/                        <- every figure used in the paper (PNG + PDF)
 \- docs/
    |- 00_handoff_guide.md                 <- HANDOFF GUIDE (start here)
    |- 01_code_audit.md              <- audit of the original code + cleanup plan
    |- 02_file_roles.md              <- role of every research file
    \- 03_results_and_data_locations.md   <- result numbers and data locations
 ```
+
+---
+
+## Manuscript figures
+
+`figures/paper/` holds the exact figure files that go into the paper (PNG + PDF), and
+`07_paper_figures/` holds the scripts that produce them. Each script takes its numbers from the
+tables of the thesis and writes into `figures/paper/`:
+
+| Script | Produces |
+|---|---|
+| `07_paper_figures/plot_axis_iterations.py` | `x_axis_iterations`, `y_axis_iterations`, `mae_summary` |
+| `07_paper_figures/plot_trajectory_rmse.py` | `trajectory_rmse_iterations_final`, `trajectory_summary_bars_final` |
+| `07_paper_figures/plot_environmental_noise.py` | `environmental_noise_with_std` |
+| `06_measurement_error/plot_measurement_error.py` | `1_4_position_comparison_combined` |
+
+`07_paper_figures/verify_environmental_noise.py` re-derives the environmental-noise values from
+the raw stills instead of trusting the hard-coded array, and prints both statistics definitions
+side by side. Run it (`python verify_environmental_noise.py`) to audit that figure.
+
+> The three `plot_*.py` files are faithful copies of the author's original plotting code from
+> `After Lulus Paper/code/`: data, labels and layout are untouched — only the comments were
+> translated and the output folder redirected into the repo. All 14 files in `figures/paper/`
+> were regenerated from these scripts and match the originals pixel for pixel.
 
 ---
 
