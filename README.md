@@ -5,7 +5,7 @@ Calibration of the motion axes of a 3D printer (**steps/mm**, **backlash**, and
 single camera and a chessboard target as a *virtual encoder*. The result is validated by
 running an elliptical toolpath and measuring the deviation from ground truth.
 
-> **Start here:** [`docs/00_PANDUAN.md`](docs/00_PANDUAN.md) - a step-by-step handoff
+> **Start here:** [`docs/00_handoff_guide.md`](docs/00_handoff_guide.md) - a step-by-step handoff
 > guide with the expected output of every stage. *(The `docs/` files are written in
 > Indonesian; the code, this README, and all outputs are in English.)*
 
@@ -45,7 +45,7 @@ the order of the measuring instrument's own *measurement error*.
 The chain: 80.00 (baseline) -> 79.6314 (round-1 recommendation) -> several intermediate
 rounds -> **79.72 (final)**. So if you run the notebooks on the included dataset and get a
 recommendation of 79.6314, that is **not a bug** - it is round one, not the final value.
-Full procedure: [`docs/00_PANDUAN.md`](docs/00_PANDUAN.md) Step 2b.
+Full procedure: [`docs/00_handoff_guide.md`](docs/00_handoff_guide.md) Step 2b.
 
 **Measurement error** (validation against a dial indicator, 0.5 mm commanded move,
 5 iterations): the mean absolute difference between the virtual-encoder reading and the
@@ -99,10 +99,10 @@ the ±10 µm resolution of the dial indicator itself.
 
 | Stage | File | Input | Output |
 |---|---|---|---|
-| 1 | `01_camera_calibration_paper/kalibrasi_kamera.ipynb` | chessboard images | `camera_matrix.csv`, `dist_coeffs.csv`, `camera_params.csv`, `reprojection_rmse.csv` |
-| 2 | `02_machine_calibration/kalibrasi_mesin.ipynb` | K/D + `oriy/fwd/bck` dataset | `M92`/`M425`/`M852` recommendations, `visualisasi_*.png` |
-| 3 | `03_virtual_encoder/kalibrasi_lintasan.ipynb` | `pose_video_XX.avi` | trajectory CSV + comparison figures |
-| 4 | `04_trajectory_evaluation/evaluasi_lintasan.ipynb` | two trajectory CSVs | evaluation figures, RMSE in µm, % improvement |
+| 1 | `01_camera_calibration/camera_calibration.ipynb` | chessboard images | `camera_matrix.csv`, `dist_coeffs.csv`, `camera_params.csv`, `reprojection_rmse.csv` |
+| 2 | `02_machine_calibration/machine_calibration.ipynb` | K/D + `oriy/fwd/bck` dataset | `M92`/`M425`/`M852` recommendations, `visualization_*.png` |
+| 3 | `03_virtual_encoder/virtual_encoder.ipynb` | `pose_video_XX.avi` | trajectory CSV + comparison figures |
+| 4 | `04_trajectory_evaluation/trajectory_evaluation.ipynb` | two trajectory CSVs | evaluation figures, RMSE in µm, % improvement |
 | 6 | `06_measurement_error/plot_measurement_error.py` | `dial_vs_ve.csv` | 4-panel figure + MAE table |
 
 Supporting files:
@@ -111,7 +111,7 @@ Supporting files:
   `python config_paths.py`.
 - `calibration_pipeline.py` - the corner-detection functions (EDLines, screening,
   subpixel refinement, sorting) shared by all notebooks.
-- `05_akuisisi_alat/` - scripts that require the machine and camera (see the README there).
+- `05_data_acquisition/` - scripts that require the machine and camera (see the README there).
 
 ---
 
@@ -162,11 +162,11 @@ Folder Rapih Code & Data Thesis/
 |- config_paths.py                  <- all dataset paths (run it to check your data)
 |- calibration_pipeline.py          <- shared corner-detection functions
 |- requirements.txt
-|- 01_camera_calibration_paper/kalibrasi_kamera.ipynb
-|- 02_machine_calibration/kalibrasi_mesin.ipynb
-|- 03_virtual_encoder/kalibrasi_lintasan.ipynb
-|- 04_trajectory_evaluation/evaluasi_lintasan.ipynb
-|- 05_akuisisi_alat/                <- requires the machine and camera
+|- 01_camera_calibration/camera_calibration.ipynb
+|- 02_machine_calibration/machine_calibration.ipynb
+|- 03_virtual_encoder/virtual_encoder.ipynb
+|- 04_trajectory_evaluation/trajectory_evaluation.ipynb
+|- 05_data_acquisition/                <- requires the machine and camera
 |- 06_measurement_error/plot_measurement_error.py   <- dial indicator vs virtual encoder
 |- data/
 |  |- MANIFEST.md                   <- original folder name -> repo name mapping
@@ -174,10 +174,10 @@ Folder Rapih Code & Data Thesis/
 |  \- processed/                    <- output of each stage (in git)
 |- figures/                         <- figures for the manuscript
 \- docs/
-   |- 00_PANDUAN.md                 <- HANDOFF GUIDE (start here; Indonesian)
-   |- 01_audit_kode.md              <- audit of the original code + cleanup plan
-   |- 02_peran_file.md              <- role of every research file
-   \- 03_hasil_dan_lokasi_data.md   <- result numbers and data locations
+   |- 00_handoff_guide.md                 <- HANDOFF GUIDE (start here; Indonesian)
+   |- 01_code_audit.md              <- audit of the original code + cleanup plan
+   |- 02_file_roles.md              <- role of every research file
+   \- 03_results_and_data_locations.md   <- result numbers and data locations
 ```
 
 ---
@@ -211,4 +211,4 @@ export KALIBRASI_MODE=baseline     # Linux / macOS
 | `measurement_error` | `measurement_error/*_machine_movement` | 80 / 80 | 0.5 mm |
 
 Detailed per-stage instructions, expected outputs, and known limitations are in
-[`docs/00_PANDUAN.md`](docs/00_PANDUAN.md).
+[`docs/00_handoff_guide.md`](docs/00_handoff_guide.md).

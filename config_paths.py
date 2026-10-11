@@ -184,8 +184,8 @@ CSV_NASKAH = {
     "baseline_y":   os.path.join(CSV_VE_DIR, "baseline_y.csv"),
     "calibrated_x": os.path.join(CSV_VE_DIR, "calibrated_x.csv"),
     "calibrated_y": os.path.join(CSV_VE_DIR, "calibrated_y.csv"),
-    "analisa_baseline_x":   os.path.join(CSV_VE_DIR, "analisa_baseline_x.csv"),
-    "analisa_calibrated_x": os.path.join(CSV_VE_DIR, "analisa_calibrated_x.csv"),
+    "baseline_x_analysis":   os.path.join(CSV_VE_DIR, "baseline_x_analysis.csv"),
+    "calibrated_x_analysis": os.path.join(CSV_VE_DIR, "calibrated_x_analysis.csv"),
 }
 
 # Parameter lintasan elips (ground truth)
