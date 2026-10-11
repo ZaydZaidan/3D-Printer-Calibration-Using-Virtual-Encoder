@@ -1,175 +1,179 @@
-# PANDUAN HANDOFF — Cara Pakai & Mereproduksi Penelitian
+# HANDOFF GUIDE — How to Use & Reproduce the Research
 
-Dokumen ini untuk **orang berikutnya** yang melanjutkan atau memakai repo ini.
-Ikuti berurutan. Setiap tahap mencantumkan masukan, keluaran, dan **hasil yang
-seharusnya Anda lihat**, supaya Anda tahu pekerjaan Anda benar atau tidak.
+This document is for the **next person** who continues or uses this repo.
+Follow it in order. Each stage lists the inputs, the outputs, and **the result
+you should see**, so that you know whether your work is correct or not.
 
-> Seluruh angka di dokumen ini sudah **diverifikasi ulang** dengan menjalankan kembali
-> notebook di repo ini (bukan salinan dari naskah). Lihat bagian 4.
+> All numbers in this document were **re-verified** by re-running the notebooks
+> in this repo (not copied from the manuscript). See section 4.
 
 ---
 
-## 1. Ringkasan penelitian
+## 1. Research summary
 
-Kalibrasi sumbu mesin 3D printer **tanpa dial gauge dan tanpa encoder**, memakai satu
-kamera + papan catur sebagai **virtual encoder**. Yang dikalibrasi: **steps/mm**,
-**backlash**, dan **skew/ortogonalitas XY**. Pembuktiannya lintasan elips bolak-balik
-dibandingkan dengan ground truth.
+Calibration of 3D printer machine axes **without a dial gauge and without an
+encoder**, using a single camera + chessboard as a **virtual encoder**. What is
+calibrated: **steps/mm**, **backlash**, and **skew/XY orthogonality**. The
+validation is a forward-and-backward ellipse trajectory compared against the
+ground truth.
 
-Alur besar:
+High-level flow:
 
 ```
-kalibrasi kamera -> kalibrasi mesin (linear) -> lintasan elips -> virtual encoder -> evaluasi
+camera calibration -> machine calibration (linear) -> ellipse trajectory -> virtual encoder -> evaluation
 ```
 
-## 2. Hasil utama
+## 2. Main results
 
-**A. Kalibrasi mesin (pengujian linear, target 10 mm, 10 sampel valid dari 40)**
+**A. Machine calibration (linear test, 10 mm target, 10 valid samples out of 40)**
 
-| Metrik | Baseline | Setelah kalibrasi | Perbaikan |
+| Metric | Baseline | After calibration | Improvement |
 |---|---|---|---|
-| Error sumbu X | 0.0463 mm | 0.0071 mm | 84.7 % |
-| Error sumbu Y | 0.0550 mm | 0.0054 mm | 90.2 % |
-| Drift Y saat gerak X (skew) | 0.0937 mm | 0.0043 mm | 95.4 % |
-| Drift X saat gerak Y (skew) | 0.0898 mm | 0.0036 mm | 96.0 % |
+| X-axis error | 0.0463 mm | 0.0071 mm | 84.7 % |
+| Y-axis error | 0.0550 mm | 0.0054 mm | 90.2 % |
+| Y drift during X motion (skew) | 0.0937 mm | 0.0043 mm | 95.4 % |
+| X drift during Y motion (skew) | 0.0898 mm | 0.0036 mm | 96.0 % |
 
-Parameter: awal steps/mm **80 / 80**, backlash comp **0**, skew comp **0**.
-Hasil: steps/mm **79.72 / 80.40**, backlash **0.0124 / 0.0244 mm**,
+Parameters: initial steps/mm **80 / 80**, backlash comp **0**, skew comp **0**.
+Result: steps/mm **79.72 / 80.40**, backlash **0.0124 / 0.0244 mm**,
 skew **-0.009327 / 0.009025** (≈ ±0.52°).
 
-**B. Evaluasi lintasan elips (RMSE terhadap ground truth)**
+**B. Ellipse trajectory evaluation (RMSE against ground truth)**
 
-| Metrik | Baseline | Setelah kalibrasi |
+| Metric | Baseline | After calibration |
 |---|---|---|
 | RMSE X | 76.91 µm (std 5.33) | 34.42 µm (std 1.61) |
 | RMSE Y | 65.29 µm (std 4.67) | 30.75 µm (std 1.30) |
 | **RMSE Total** | **100.89 µm** (std 7.00) | **46.17 µm** (std 1.68) |
 
-**Perbaikan akurasi lintasan: 54.24 %.**
+**Trajectory accuracy improvement: 54.24 %.**
 
-## 3. Prasyarat
+## 3. Prerequisites
 
-**Perangkat lunak**
+**Software**
 
 ```bash
 pip install -r requirements.txt
 ```
 
-- Python **3.11** (penelitian memakai 3.11.9).
-- `opencv-contrib-python` **wajib** versi contrib — kode memakai `cv2.ximgproc`
-  (`createEdgeDrawing`) yang tidak ada di `opencv-python` biasa.
-- Paket: opencv-contrib-python 4.12.0.88, numpy 2.2.6, scipy 1.17.1, pandas 3.0.2,
-  matplotlib 3.10.8. Jalankan notebook dengan `pandas` dan `numpy` tersedia karena
-  pertukaran parameter kamera memakai CSV.
+- Python **3.11** (the research used 3.11.9).
+- `opencv-contrib-python` is **required** (the contrib version) — the code uses
+  `cv2.ximgproc` (`createEdgeDrawing`), which is not available in plain
+  `opencv-python`.
+- Packages: opencv-contrib-python 4.12.0.88, numpy 2.2.6, scipy 1.17.1, pandas 3.0.2,
+  matplotlib 3.10.8. Run the notebooks with `pandas` and `numpy` available, since
+  camera parameters are exchanged via CSV.
 
-**Data** — sudah ikut di folder ini:
+**Data** — already included in this folder:
 
-| Lokasi | Isi | Ukuran |
+| Location | Content | Size |
 |---|---|---|
-| `data/raw/camera_calibration/` | citra papan catur untuk kalibrasi kamera | 19 MB |
-| `data/raw/linear_baseline_x`, `linear_baseline_y` | dataset linear sebelum kalibrasi | 44 MB |
-| `data/raw/linear_calibrated_x`, `linear_calibrated_y` | dataset linear setelah kalibrasi | 44 MB |
-| `data/raw/measurement_error/` | dataset dial gauge (0.5 mm, parameter baseline) | 63 MB |
-| `data/raw/circular_baseline`, `circular_calibrated` | CSV + gambar lintasan elips | 13 MB |
-| `data/raw/video_*` | video mentah lintasan (untuk menjalankan ulang virtual encoder) | 1.7 GB |
+| `data/raw/camera_calibration/` | chessboard images for camera calibration | 19 MB |
+| `data/raw/linear_baseline_x`, `linear_baseline_y` | linear dataset before calibration | 44 MB |
+| `data/raw/linear_calibrated_x`, `linear_calibrated_y` | linear dataset after calibration | 44 MB |
+| `data/raw/measurement_error/` | dial gauge dataset (0.5 mm, baseline parameters) | 63 MB |
+| `data/raw/circular_baseline`, `circular_calibrated` | CSV + ellipse trajectory images | 13 MB |
+| `data/raw/video_*` | raw trajectory videos (to re-run the virtual encoder) | 1.7 GB |
 
-Rincian nama asli tiap folder: **`data/MANIFEST.md`**.
+Details of the original name of each folder: **`data/MANIFEST.md`**.
 
-**Perangkat keras** — hanya diperlukan bila ingin **mengambil data baru** (folder `05_akuisisi_alat/`).
-Untuk sekadar mengecek/mereproduksi hasil dari data yang sudah ada, tidak perlu mesin.
+**Hardware** is only needed if you want to **acquire new data** (folder `05_data_acquisition/`).
+To merely check/reproduce the results from data that already exists, no machine is required.
 
-## 4. Bukti repo ini jalan (sudah diuji)
+## 4. Evidence this repo runs (already tested)
 
-Setelah penataan, ketiga notebook dijalankan ulang dari nol di repo ini:
+After the reorganization, the three notebooks were re-run from scratch in this repo:
 
-| Notebook | Hasil yang keluar | Cocok dengan log penelitian? |
+| Notebook | Output produced | Matches the research log? |
 |---|---|---|
-| `01_.../kalibrasi_kamera.ipynb` | 10 citra valid. **RMSE reprojection keseluruhan 0.1154 px** (rata-rata per citra 0.1152 px; min 0.0979, maks 0.1249) | tidak ada log aslinya — artefak ini baru dibuat sekarang |
-| `02_.../kalibrasi_mesin.ipynb` | X: Δ 10.0045 mm, error 0.0071 mm, RMSE 0.1186 px, `M92 X79.68`, `M425 X0.0068`, skew 0.000427 | **identik digit-per-digit** dengan `DATA HASIL KALIBRASI LINEAR X DAN Y.txt` |
-| `02_.../kalibrasi_mesin.ipynb` | Y: Δ -10.0022 mm, error 0.0054 mm, RMSE 0.1281 px, `M92 Y80.38`, `M425 Y0.0068`, skew 0.000362 | **identik** dengan log yang sama |
-| `04_.../evaluasi_lintasan.ipynb` | Baseline 100.89 µm -> terkalibrasi 46.17 µm, **perbaikan 54.24 %** | sesuai angka yang dilaporkan |
+| `01_.../camera_calibration.ipynb` | 10 valid images. **Overall reprojection RMSE 0.1154 px** (mean per image 0.1152 px; min 0.0979, max 0.1249) | there is no original log — this artifact was created just now |
+| `02_.../machine_calibration.ipynb` | X: Δ 10.0045 mm, error 0.0071 mm, RMSE 0.1186 px, `M92 X79.68`, `M425 X0.0068`, skew 0.000427 | **identical digit-for-digit** to `DATA HASIL KALIBRASI LINEAR X DAN Y.txt` |
+| `02_.../machine_calibration.ipynb` | Y: Δ -10.0022 mm, error 0.0054 mm, RMSE 0.1281 px, `M92 Y80.38`, `M425 Y0.0068`, skew 0.000362 | **identical** to the same log |
+| `04_.../trajectory_evaluation.ipynb` | Baseline 100.89 µm -> calibrated 46.17 µm, **improvement 54.24 %** | matches the reported numbers |
 
-Artinya: data, konfigurasi path, dan pemisahan notebook sudah konsisten.
+This means: the data, the path configuration, and the notebook separation are consistent.
 
-## 5. Struktur repo
+## 5. Repo structure
 
 ```
 Folder Rapih Code & Data Thesis/
-├─ README.md                  ringkasan + hasil
-├─ config_paths.py            >>> SEMUA PATH ADA DI SINI <<<
-├─ calibration_pipeline.py    fungsi deteksi sudut (dipakai bersama semua notebook)
+├─ README.md                  summary + results
+├─ config_paths.py            >>> ALL PATHS ARE HERE <<<
+├─ calibration_pipeline.py    corner detection functions (shared by all notebooks)
 ├─ requirements.txt
-├─ 01_camera_calibration_paper/kalibrasi_kamera.ipynb
-├─ 02_machine_calibration/kalibrasi_mesin.ipynb
-├─ 03_virtual_encoder/kalibrasi_lintasan.ipynb
-├─ 04_trajectory_evaluation/evaluasi_lintasan.ipynb
-├─ 05_akuisisi_alat/          skrip yang butuh mesin & kamera (lihat README di dalamnya)
+├─ 01_camera_calibration/camera_calibration.ipynb
+├─ 02_machine_calibration/machine_calibration.ipynb
+├─ 03_virtual_encoder/virtual_encoder.ipynb
+├─ 04_trajectory_evaluation/trajectory_evaluation.ipynb
+├─ 05_data_acquisition/       scripts that need the machine & camera (see the README inside)
 ├─ 06_measurement_error/plot_measurement_error.py   dial gauge vs virtual encoder
-├─ data/raw/                  data mentah + video (TIDAK di-commit ke git, ikut lewat folder ini)
-├─ data/processed/            keluaran tiap tahap (masuk git, ukurannya kecil)
-├─ figures/                   gambar untuk naskah
-└─ docs/                      00 panduan ini, 01 audit, 02 peran file, 03 hasil & lokasi data
+├─ data/raw/                  raw data + videos (NOT committed to git, shipped via this folder instead)
+├─ data/processed/            output of each stage (committed to git, small in size)
+├─ figures/                   figures for the manuscript
+└─ docs/                      this 00 guide, 01 audit, 02 file roles, 03 results & data locations
 ```
 
-## 6. Cara menjalankan
+## 6. How to run
 
-### Langkah 0 — cek data (30 detik)
+### Step 0 — check the data (30 seconds)
 
 ```bash
 python config_paths.py
 ```
 
-Keluarannya tabel: tiap dataset ditandai `OK` atau `TIDAK DITEMUKAN`, beserta lokasi
-yang dipakai. Kalau ada yang `TIDAK DITEMUKAN`, taruh datasetnya di lokasi yang
-ditunjukkan (atau ubah bagian `LEGACY_PATHS` di `config_paths.py`).
+It prints a table: each dataset is marked `OK` or `NOT FOUND`, along with the
+location used. If something is `NOT FOUND`, put the dataset in the location
+shown (or change the `LEGACY_PATHS` section in `config_paths.py`).
 
-Jalankan notebook **dari dalam folder notebooknya masing-masing** (Jupyter sudah
-melakukannya otomatis), supaya `config_paths.py` di akar repo bisa ditemukan.
+Run each notebook **from inside its own notebook folder** (Jupyter does this
+automatically), so that `config_paths.py` at the repo root can be found.
 
-### Langkah 1 — kalibrasi kamera
+### Step 1 — camera calibration
 
-`01_camera_calibration_paper/kalibrasi_kamera.ipynb` — seluruh sel, urut.
+`01_camera_calibration/camera_calibration.ipynb` — all cells, in order.
 
-- **Masukan:** `data/raw/camera_calibration/dataset_kalibrasi_fix_prime_260/`
-- **Proses:** EDLines -> line screening -> optimasi subpiksel -> pengurutan 49 sudut
-  lewat homografi -> `cv2.calibrateCamera`
-- **Keluaran (semua ke `data/processed/camera_calibration/`):**
-  - `camera_matrix.csv` — matriks intrinsik K (3x3)
-  - `dist_coeffs.csv` — koefisien distorsi `[k1, k2, p1, p2, k3]`
-  - `camera_params.csv` — tabel parameter/nilai + ukuran citra (mudah dibaca)
-  - `reprojection_rmse.csv` — RMSE reprojection per citra
-- **Hasil yang diharapkan:** sekitar 10 citra valid, RMSE ~0.10-0.13 px.
-  Status "AKURAT" bila < 0.15 px.
-  Ada dua angka RMSE yang dicetak notebook dan **keduanya benar**, jangan tertukar:
-  **"Keseluruhan Reprojection Error (RMSE)"** = `sqrt(total_SSE / total_titik)` →
-  **0.1154 px**; sedangkan **rata-rata RMSE per citra** = rata-rata biasa dari kolom
-  `rmse_px` di `reprojection_rmse.csv` → **0.1152 px**. Keduanya berbeda sedikit karena
-  yang pertama adalah akar-dari-rata-rata (RMS), yang kedua rata-rata-dari-akar.
-  **Untuk dikutip di naskah, pakai angka yang dicetak notebook sendiri: 0.1154 px.**
-- **Waktu:** ~25 detik untuk 10 citra.
+- **Inputs:** `data/raw/camera_calibration/dataset_kalibrasi_fix_prime_260/`
+- **Process:** EDLines -> line screening -> subpixel optimization -> sorting of 49
+  corners via homography -> `cv2.calibrateCamera`
+- **Outputs (all into `data/processed/camera_calibration/`):**
+  - `camera_matrix.csv` — intrinsic matrix K (3x3)
+  - `dist_coeffs.csv` — distortion coefficients `[k1, k2, p1, p2, k3]`
+  - `camera_params.csv` — parameter/value table + image size (easy to read)
+  - `reprojection_rmse.csv` — reprojection RMSE per image
+- **Expected result:** about 10 valid images, RMSE ~0.10-0.13 px.
+  Status "ACCURATE" if < 0.15 px.
+  The notebook prints two RMSE numbers and **both are correct**, don't mix them up:
+  **"Overall Reprojection Error (RMSE)"** = `sqrt(total_SSE / total_titik)` →
+  **0.1154 px**; whereas the **mean RMSE per image** = the ordinary mean of the
+  `rmse_px` column in `reprojection_rmse.csv` → **0.1152 px**. The two differ
+  slightly because the first is a root-of-the-mean (RMS), while the second is a
+  mean-of-the-roots. **To cite in the manuscript, use the number the notebook
+  itself prints: 0.1154 px.**
+- **Time:** ~25 seconds for 10 images.
 
-Hasil pengujian di repo ini (RMSE reprojection keseluruhan 0.1154 px): `fx=2314.64`, `fy=2328.29`, `cx=637.08`, `cy=222.88`,
+The test result in this repo (overall reprojection RMSE 0.1154 px): `fx=2314.64`, `fy=2328.29`, `cx=637.08`, `cy=222.88`,
 `D = [-0.056105, 0.959537, 0.000141, 0.000407, -5.033022]`.
 
-> **Catatan:** K dan D di sini dihitung dari **10 citra** yang ada di repo, padahal nama
-> foldernya menyiratkan 260 citra. Yang penting: K/D dari 10 citra ini **sudah terbukti
-> mereproduksi seluruh angka naskah** (lihat bagian 4) — jadi untuk mereproduksi hasil
-> penelitian, 10 citra ini cukup. Untuk pengambilan data baru, K/D Anda akan berbeda;
-> itu normal dan tidak masalah (lihat bagian 7).
+> **Note:** The K and D here are computed from the **10 images** present in the
+> repo, even though the folder name implies 260 images. The important thing: the
+> K/D from these 10 images **has been proven to reproduce all the manuscript's
+> numbers** (see section 4) — so to reproduce the research results, these 10
+> images are enough. For new data acquisition, your K/D will differ; that is
+> normal and not a problem (see section 7).
 
-### Langkah 2 — kalibrasi mesin
+### Step 2 — machine calibration
 
-`02_machine_calibration/kalibrasi_mesin.ipynb` — seluruh sel, urut.
+`02_machine_calibration/machine_calibration.ipynb` — all cells, in order.
 
-- **Masukan:**
-  - `data/processed/camera_calibration/*.csv` (dari langkah 1, dimuat otomatis)
-  - dataset linear sesuai `RUN_MODE` (lihat di bawah): `oriy{i}.png`, `fwd{i}.png`,
+- **Inputs:**
+  - `data/processed/camera_calibration/*.csv` (from step 1, loaded automatically)
+  - the linear dataset according to `RUN_MODE` (see below): `oriy{i}.png`, `fwd{i}.png`,
     `bck{i}.png`, i = 1..40
-- **Keluaran:** statistik rata-rata + rekomendasi firmware `M92`, `M425`, `M852`
-  (cetak di layar), dan berkas gambar `visualisasi_*.png` di folder notebook.
-- **Waktu:** ~2 menit per sumbu.
+- **Outputs:** mean statistics + firmware recommendations `M92`, `M425`, `M852`
+  (printed on screen), and image files `visualization_*.png` in the notebook folder.
+- **Time:** ~2 minutes per axis.
 
-**Pilih mode tanpa mengedit notebook:**
+**Choose the mode without editing the notebook:**
 
 ```bash
 # Windows
@@ -178,150 +182,154 @@ set KALIBRASI_MODE=baseline
 export KALIBRASI_MODE=baseline
 ```
 
-| Mode | Dataset | steps/mm | target | catatan |
+| Mode | Dataset | steps/mm | target | note |
 |---|---|---|---|---|
-| `calibrated` (default) | `linear_calibrated_x/y` | 79.72 / 80.40 | 10 mm | mengukur **sisa** error setelah kalibrasi |
-| `baseline` | `linear_baseline_x/y` | 80 / 80 | 10 mm | kondisi sebelum kalibrasi |
-| `measurement_error` | `measurement_error/*_machine_movement` | 80 / 80 | 0.5 mm | untuk dibandingkan dengan dial gauge |
+| `calibrated` (default) | `linear_calibrated_x/y` | 79.72 / 80.40 | 10 mm | measures the **residual** error after calibration |
+| `baseline` | `linear_baseline_x/y` | 80 / 80 | 10 mm | condition before calibration |
+| `measurement_error` | `measurement_error/*_machine_movement` | 80 / 80 | 0.5 mm | for comparison with the dial gauge |
 
-- **Hasil yang diharapkan (mode `calibrated`):** X → Δ 10.0045 mm, error 0.0071 mm,
+- **Expected result (mode `calibrated`):** X → Δ 10.0045 mm, error 0.0071 mm,
   RMSE 0.1186 px. Y → Δ -10.0022 mm, error 0.0054 mm, RMSE 0.1281 px.
-- **Hasil yang diharapkan (mode `baseline`):** X → error 0.0463 mm;
+- **Expected result (mode `baseline`):** X → error 0.0463 mm;
   Y → error 0.0550 mm.
 
-> **Jangan bingung kalau rekomendasi yang keluar berbeda dari nilai di `config_paths.py`.**
-> Dataset yang tersedia menghasilkan rekomendasi **79.6314 (X)** dan **80.4425 (Y)** —
-> itu rekomendasi putaran pertama. Nilai final penelitian adalah **79.72 / 80.40**, hasil
-> beberapa putaran *fine-tuning* (lihat naskah `bab4.tex` Tabel *Parameter Hasil Kalibrasi
-> Fine Tuning*, dan `docs/03_hasil_dan_lokasi_data.md` bagian 5). Mode `calibrated` di repo
-> ini memakai nilai final tersebut karena itulah yang menghasilkan angka pada naskah.
+> **Don't be confused if the recommendation that comes out differs from the values in `config_paths.py`.**
+> The available dataset yields recommendations of **79.6314 (X)** and **80.4425 (Y)** —
+> those are the first-round recommendations. The final research values are **79.72 / 80.40**,
+> the result of several rounds of *fine-tuning* (see the manuscript `bab4.tex`, the
+> *Fine-Tuning Calibration Result Parameters* Table, and `docs/03_results_and_data_locations.md`
+> section 5). The `calibrated` mode in this repo uses those final values because they
+> are what produce the numbers in the manuscript.
 
-> Notebook ini **berhenti otomatis setelah 10 sampel valid**. Kalau banyak sampel gagal
-> ("pose tidak ditemukan"), biasanya karena pencahayaan/eksposur berbeda dari waktu
-> pengambilan data.
+> This notebook **stops automatically after 10 valid samples**. If many samples
+> fail ("pose not found"), it is usually because the lighting/exposure differs
+> from the time the data was acquired.
 
-### Langkah 2b — fine-tuning: ulangi kalibrasi sampai error *steady state*
+### Step 2b — fine-tuning: repeat calibration until the error reaches *steady state*
 
-**Inti metode ini: satu kali kalibrasi belum cukup. Rekomendasinya harus dimasukkan
-berulang kali.** Alurnya seperti ini, dan putaran ini yang diulang terus:
+**The core of this method: a single calibration is not enough. The recommendation
+must be applied repeatedly.** The flow is like this, and this loop is what gets
+repeated:
 
 ```
-   parameter yang ADA di mesin            ukur                      rekomendasi BARU
-   (STEPX, STEPY, BACKLASH,     -->   jalankan langkah 2   -->   (M92 steps/mm,
-    SKEW_FACTOR)                      atas dataset baru          M425 backlash, M852 skew)
+   parameters currently ON the machine      measure                    NEW recommendation
+   (STEPX, STEPY, BACKLASH,     -->   run step 2           -->   (M92 steps/mm,
+    SKEW_FACTOR)                      on the new dataset          M425 backlash, M852 skew)
           ^                                                            |
-          |                    MASUKKAN rekomendasi tadi              |
-          +------------------- ke mesin, ambil data lagi <-------------+
-                              (ulangi putaran ini)
+          |                    APPLY the recommendation above         |
+          +------------------- to the machine, acquire data again <----+
+                              (repeat this loop)
 
-   teruskan sampai error tidak bergerak jauh lagi   ->   STEADY STATE
+   continue until the error no longer moves much   ->   STEADY STATE
 ```
 
-Kenapa harus berulang: kondisi mekanik mesin (gesekan, kelonggaran gerigi, kemiringan
-rangka) bisa bergeser antar sesi pengambilan data, jadi satu kali koreksi belum tentu
-pas. Yang Anda lakukan adalah mengoreksi terus sampai **koreksi berikutnya tinggal nol** —
-yaitu saat rekomendasi baru sudah hampir sama dengan nilai yang sedang dipakai.
+Why it must be repeated: the machine's mechanical condition (friction, gear play,
+frame tilt) can shift between data-acquisition sessions, so a single correction is
+not necessarily right. What you do is keep correcting until **the next correction
+is nearly zero** — that is, when the new recommendation is already almost the same
+as the value currently in use.
 
-Satu putaran praktisnya:
+One practical loop:
 
-1. Masukkan parameter yang sekarang dipakai ke
-   `05_akuisisi_alat/otomasi_pengujian_linear.py` (`STEPX`, `STEPY`, `BACKLASH`,
+1. Enter the parameters currently in use into
+   `05_data_acquisition/automated_linear_test.py` (`STEPX`, `STEPY`, `BACKLASH`,
    `SKEW_FACTOR`).
-2. Ambil dataset pengujian linear **baru** (mesin bergerak dengan parameter itu).
-3. Jalankan notebook langkah 2 atas dataset baru tersebut → tercetak **error sisa** dan
-   **rekomendasi baru**.
-4. Kembali ke langkah 1 dengan rekomendasi tadi. Ulangi sampai *steady state*.
+2. Acquire a **new** linear test dataset (the machine moves with those parameters).
+3. Run the step-2 notebook on that new dataset → the **residual error** and the
+   **new recommendation** are printed.
+4. Go back to step 1 with that recommendation. Repeat until *steady state*.
 
-**Tanda sudah mencapai *steady state*:**
+**Signs that *steady state* has been reached:**
 
-- Error perpindahan maju tidak lagi turun berarti, dan **sudah di orde batas
-  *measurement error* alat ukur Anda** (di penelitian ini dial gauge beresolusi ±10 µm,
-  dan error akhirnya 7,1 µm untuk X serta 5,4 µm untuk Y — sudah di dalam batas itu).
-- Rekomendasi `steps/mm` baru **hampir sama** dengan nilai yang sedang dipakai.
-- Rekomendasi `skew` sudah kecil; di penelitian ini putaran terakhir memberi
-  0.000427 (≈0.024°) dan notebook menyatakan *"Sudah siku (Orthogonal), kompensasi
-  tidak diperlukan"*.
+- The forward travel error no longer drops significantly, and is **already on the
+  order of the *measurement error* limit of your measuring instrument** (in this
+  research the dial gauge has a resolution of ±10 µm, and the final error is 7.1 µm
+  for X and 5.4 µm for Y — already within that limit).
+- The new `steps/mm` recommendation is **almost the same** as the value currently in use.
+- The `skew` recommendation is already small; in this research the last round gave
+  0.000427 (≈0.024°) and the notebook states *"Orthogonal, no compensation
+  needed"*.
 
-**Contoh nyata dari penelitian ini** (rantai nilainya, lihat juga `docs/03` bagian 5):
+**A real example from this research** (the chain of values; see also `docs/03` section 5):
 
 ```
-80.00 steps/mm  (baseline, log tersimpan)
-   -> 79.6314   (rekomendasi putaran 1, log tersimpan)
-      -> 80.13 / 80.11 / varian skew   (putaran antara; datasetnya ada di ARSIP,
-                                        TIDAK ditampilkan di naskah)
-         -> 79.72  (FINAL, setelah steady state)
+80.00 steps/mm  (baseline, log saved)
+   -> 79.6314   (round-1 recommendation, log saved)
+      -> 80.13 / 80.11 / skew variants   (intermediate rounds; their datasets are in the
+                                          ARCHIVE, NOT shown in the manuscript)
+         -> 79.72  (FINAL, after steady state)
 ```
 
-Naskah hanya menampilkan **dua titik**: baseline dan nilai final setelah fine-tuning.
-Itu memang cukup untuk naskah — rantai antaranya tidak perlu.
+The manuscript shows only **two points**: baseline and the final value after fine-tuning.
+That is indeed enough for the manuscript — the intermediate chain is not needed.
 
-**Catatan praktis kalau Anda mengulang dengan mesin sendiri:** repo ini menyediakan tiga
-mode siap pakai (`baseline`, `calibrated`, `measurement_error`). Untuk iterasi fine-tuning
-Anda sendiri, tambahkan satu entri di `config_paths.py` pada dua tempat:
-`MODE_PARAMS` (nilai `delta`/`steps` yang sedang dipakai) dan
-`DATASET_X_BY_MODE` / `DATASET_Y_BY_MODE` (folder dataset iterasi itu), lalu pilih
-lewat `KALIBRASI_MODE`.
+**Practical note if you repeat this with your own machine:** this repo provides three
+ready-to-use modes (`baseline`, `calibrated`, `measurement_error`). For your own
+fine-tuning iterations, add one entry in `config_paths.py` in two places:
+`MODE_PARAMS` (the `delta`/`steps` value currently in use) and
+`DATASET_X_BY_MODE` / `DATASET_Y_BY_MODE` (the dataset folder for that iteration),
+then select it via `KALIBRASI_MODE`.
 
-**Parameter final penelitian ini:**
+**Final parameters of this research:**
 
-| Parameter | Sumbu X | Sumbu Y |
+| Parameter | X-axis | Y-axis |
 |---|---|---|
 | steps/mm | 79.72 | 80.40 |
 | backlash | 13.3 µm | 31.4 µm |
-| skew | -9.2 µm/mm (drift X saat Y bergerak) | 9.213 µm/mm (drift Y saat X bergerak) |
+| skew | -9.2 µm/mm (X drift during Y motion) | 9.213 µm/mm (Y drift during X motion) |
 
-### Langkah 3 — virtual encoder (video -> lintasan)
+### Step 3 — virtual encoder (video -> trajectory)
 
-`03_virtual_encoder/kalibrasi_lintasan.ipynb`
+`03_virtual_encoder/virtual_encoder.ipynb`
 
-- **Masukan:** video `data/raw/video_*/pose_video_XX.avi`, dan K/D dari langkah 1
-- **Keluaran:** `data/processed/virtual_encoder/<CSV_PREFIX>_XX.csv` —
-  kolom `Frame, Waktu (detik), X Posisi (mm), Y Posisi (mm), Reprojection Error (px)`
-- **Parameter:** atur `KALIBRASI_VIDEO` (folder video) dan `KALIBRASI_CSV_PREFIX`
-  (nama berkal CSV keluaran) di `config_paths.py`. Kombinasi yang menghasilkan artefak
-  penelitian (dinyatakan pemilik penelitian):
+- **Inputs:** videos `data/raw/video_*/pose_video_XX.avi`, and K/D from step 1
+- **Outputs:** `data/processed/virtual_encoder/<CSV_PREFIX>_XX.csv` —
+  columns `Frame, Waktu (detik), X Posisi (mm), Y Posisi (mm), Reprojection Error (px)`
+- **Parameters:** set `KALIBRASI_VIDEO` (video folder) and `KALIBRASI_CSV_PREFIX`
+  (output CSV filename) in `config_paths.py`. The combination that produces the
+  research artifacts (as stated by the research owner):
 
-| Folder video di repo | Nama asli | Isi | Prefiks CSV keluaran |
+| Video folder in repo | Original name | Content | Output CSV prefix |
 |---|---|---|---|
-| `video_baseline_x` | `BASELINE_JALUR_FINAL_VIDEO` | video pengujian **circular baseline** | `hasil_fix_banget_baseline` |
-| `video_calibrated_x` | `KALIBRASI_JALUR_FINAL_VIDEO_3` | video pengujian **circular hasil kalibrasi** | `JALUR_VIDEO_FINAL_3` |
-| `video_kalibrasi_x` | `KALIBRASI_X_VIDEO_BENERAN` | 3 video sumbu X | `KALIBRASI_X_VIDEO_FINAL_BENERAN` |
-| `video_baseline_y`, `video_calibrated_y` | `..._BGT_BGT` | video sumbu Y | `..._BGT_BGT` |
+| `video_baseline_x` | `BASELINE_JALUR_FINAL_VIDEO` | **circular baseline** test video | `hasil_fix_banget_baseline` |
+| `video_calibrated_x` | `KALIBRASI_JALUR_FINAL_VIDEO_3` | **circular calibrated** test video | `JALUR_VIDEO_FINAL_3` |
+| `video_kalibrasi_x` | `KALIBRASI_X_VIDEO_BENERAN` | 3 X-axis videos | `KALIBRASI_X_VIDEO_FINAL_BENERAN` |
+| `video_baseline_y`, `video_calibrated_y` | `..._BGT_BGT` | Y-axis videos | `..._BGT_BGT` |
 
-> **JANGAN dijalankan kecuali perlu.** Video berukuran ~30-46 MB per berkas; total
-> 1.7 GB untuk 37 berkas. Memproses satu video butuh waktu lama, dan **tidak perlu**
-> untuk sekadar mereproduksi hasil penelitian: CSV lintasan yang dibutuhkan langkah 4
-> sudah tersedia di `data/raw/circular_baseline/` dan `data/raw/circular_calibrated/`.
-> Virtual encoder hanya perlu dijalankan ulang kalau Anda punya video lintasan baru.
+> **DO NOT run unless needed.** The videos are ~30-46 MB per file; 1.7 GB total
+> for 37 files. Processing one video takes a long time, and is **not necessary**
+> just to reproduce the research results: the trajectory CSVs needed by step 4
+> are already available in `data/raw/circular_baseline/` and `data/raw/circular_calibrated/`.
+> The virtual encoder only needs to be re-run if you have new trajectory videos.
 
-- **Catatan:** sel terakhir membuat gambar perbandingan ke `figures/`.
+- **Note:** the last cell produces a comparison figure into `figures/`.
 
-### Langkah 4 — evaluasi lintasan
+### Step 4 — trajectory evaluation
 
-`04_trajectory_evaluation/evaluasi_lintasan.ipynb`
+`04_trajectory_evaluation/trajectory_evaluation.ipynb`
 
-- **Masukan:** `data/raw/circular_baseline/hasil_fix_banget_baseline_XX.csv` dan
+- **Inputs:** `data/raw/circular_baseline/hasil_fix_banget_baseline_XX.csv` and
   `data/raw/circular_calibrated/JALUR_VIDEO_FINAL_3_XX.csv`
-- **Proses:** bangkitkan ground truth 2 elips, cari tetangga terdekat tiap titik
-  dengan `cKDTree`, hitung RMSE per sumbu dan total (µm)
-- **Keluaran:** gambar evaluasi ke `figures/`, dan tabel ringkasan di layar
-- **Hasil yang diharapkan:** baseline 100.89 µm -> terkalibrasi 46.17 µm, perbaikan **54.24 %**
-- **Waktu:** ~15 detik
+- **Process:** generate the ground truth as 2 ellipses, find the nearest neighbor of
+  each point with `cKDTree`, compute RMSE per axis and total (µm)
+- **Outputs:** evaluation figures into `figures/`, and a summary table on screen
+- **Expected result:** baseline 100.89 µm -> calibrated 46.17 µm, improvement **54.24 %**
+- **Time:** ~15 seconds
 
-### Langkah 5 — measurement error (perbandingan dengan dial gauge)
+### Step 5 — measurement error (comparison with the dial gauge)
 
-Eksperimen ini membandingkan pembacaan metode ini (*virtual encoder*) dengan **dial gauge**.
-Konfigurasi: parameter baseline semua, **jarak gerak diperkecil ke 0.5 mm**, 5 iterasi per
-panel (maju dan balik, sumbu X dan Y).
+This experiment compares the readings of this method (*virtual encoder*) with the **dial gauge**.
+Configuration: all baseline parameters, **travel distance reduced to 0.5 mm**, 5 iterations per
+panel (forward and backward, X and Y axes).
 
 ```bash
 python 06_measurement_error/plot_measurement_error.py
 ```
 
-- **Masukan:** `data/processed/measurement_error/dial_vs_ve.csv`
-  (foto dial gauge-nya di `data/raw/measurement_error/x_dial_gauge/` dan `y_dial_gauge/`)
-- **Keluaran:** `figures/1_4_position_comparison_combined.png` (+ `.pdf`) dan tabel MAE di layar
-- **Hasil yang diharapkan** (selisih absolut rata-rata |VE - dial|):
+- **Inputs:** `data/processed/measurement_error/dial_vs_ve.csv`
+  (the dial gauge photos are in `data/raw/measurement_error/x_dial_gauge/` and `y_dial_gauge/`)
+- **Outputs:** `figures/1_4_position_comparison_combined.png` (+ `.pdf`) and the MAE table on screen
+- **Expected result** (mean absolute difference |VE - dial|):
 
   | Panel | MAE | std |
   |---|---|---|
@@ -329,73 +337,75 @@ python 06_measurement_error/plot_measurement_error.py
   | Y Forward | 8.54 µm | 7.77 µm |
   | X Backward | 5.30 µm | 2.54 µm |
   | Y Backward | 7.08 µm | 4.94 µm |
-  | **Gabungan X** | **4.96 µm** | 3.36 µm |
-  | **Gabungan Y** | **7.81 µm** | 6.18 µm |
+  | **Combined X** | **4.96 µm** | 3.36 µm |
+  | **Combined Y** | **7.81 µm** | 6.18 µm |
 
-  Dial gauge punya resolusi ±10 µm, jadi selisih di orde 5-8 µm berada di dalam
-  ketelitian alat ukurnya.
-- **Waktu:** ~5 detik. Gambar keluarannya identik dengan gambar naskah (2584x2134 px).
+  The dial gauge has a resolution of ±10 µm, so a difference on the order of 5-8 µm is within
+  the precision of the measuring instrument.
+- **Time:** ~5 seconds. The output figure is identical to the manuscript's figure (2584x2134 px).
 
-## 7. Menyesuaikan dengan mesin/kamera baru
+## 7. Adapting to a new machine/camera
 
-1. Cetak papan kalibrasi: `python 05_akuisisi_alat/buat_papan_catur.py`
-   (A4, grid 8x8 kotak 20 mm, 3 lingkaran penanda penentu origin).
-2. Foto papan dari banyak sudut dengan `05_akuisisi_alat/capture_kalibrasi_kamera.py`
-   (tombol `f`). Sebaiknya **jauh lebih dari 10 citra**, dan variasi kemiringan/posisi
-   yang lebar.
-3. Jalankan langkah 1 di atas. **K, D, dan nilai RMSE reprojection akan berbeda dari
-   penelitian ini** — itu memang begitu, karena kamera dan posisi pemasangannya beda.
-   Yang perlu sama hanyalah urutan tahapannya, bukan angkanya. Hal yang sama berlaku
-   kalau Anda memakai dataset kalibrasi alternatif (mis. `measurement_error/x_camera_calibration`).
-4. Ambil dataset linear dengan `05_akuisisi_alat/otomasi_pengujian_linear.py`
-   (ubah `COM10` -> port Anda, `TEST_MODE`, parameter awal 80/80/0/0).
-5. Jalankan langkah 2 -> Anda dapat nilai `M92`/`M425`/`M852` baru.
-6. Masukkan nilai itu ke `05_akuisisi_alat/otomasi_lintasan_elips.py`, ambil video
-   lintasan, lalu lanjut langkah 3 dan 4.
+1. Print the calibration board: `python 05_data_acquisition/generate_chessboard.py`
+   (A4, 8x8 grid of 20 mm squares, 3 marker circles that define the origin).
+2. Photograph the board from many angles with `05_data_acquisition/capture_camera_calibration.py`
+   (the `f` key). It is best to use **far more than 10 images**, with wide variation in
+   tilt/position.
+3. Run step 1 above. **K, D, and the reprojection RMSE value will differ from this
+   research** — that is expected, because the camera and its mounting position are
+   different. Only the order of the stages needs to be the same, not the numbers. The
+   same applies if you use an alternative calibration dataset (e.g.
+   `measurement_error/x_camera_calibration`).
+4. Acquire a linear dataset with `05_data_acquisition/automated_linear_test.py`
+   (change `COM10` -> your port, `TEST_MODE`, initial parameters 80/80/0/0).
+5. Run step 2 -> you get new `M92`/`M425`/`M852` values.
+6. Enter those values into `05_data_acquisition/automated_ellipse_path.py`, record the
+   trajectory videos, then continue to steps 3 and 4.
 
-## 8. Batasan yang harus Anda ketahui (jujur, belum lengkap)
+## 8. Limitations you should know (honest, not yet complete)
 
-Hal-hal berikut **tidak** terselesaikan di penataan ini dan perlu keputusan pemilik penelitian:
+The following items were **not** resolved in this reorganization and need a decision from the research owner:
 
-1. **Nama folder kalibrasi menyesatkan: `dataset_kalibrasi_fix_prime_260` berisi 10 citra,
-   bukan 260.** Ini **bukan masalah untuk reproduksi** — K/D dari 10 citra itu sudah
-   mereproduksi seluruh angka naskah (bagian 4). Dicatat hanya supaya Anda tidak mencari
-   "sisa 250 citra" yang mungkin memang tidak pernah ada. Kalau naskah menyebut jumlah
-   citra kalibrasi secara eksplisit, angka itulah yang perlu dicocokkan.
-2. **Jejak pembuat `hasil_fix_banget_baseline_XX.csv` tidak tersimpan di kode.**
-   Menurut pemilik penelitian, CSV baseline ini dihasilkan oleh **kode yang sama**
-   (`virtualencodervideo`), hanya berbeda **video masukan** (`BASELINE_JALUR_FINAL_VIDEO`)
-   dan **path CSV keluaran**. Di kode yang tersisa, tidak ada notebook yang menulis nama
-   berkas itu — semua hanya membacanya (dikonfirmasi dengan pencarian ke seluruh notebook).
-   Jadi jalur baseline dan jalur terkalibrasi memakai skrip yang sama, dan yang berbeda
-   hanya parameter di kepala skrip. Di repo ini keduanya sudah disatukan lewat
-   `config_paths.py`: `KALIBRASI_VIDEO` dan `KALIBRASI_CSV_PREFIX`.
-4. **Skrip akuisisi belum diparameterisasi.** Isinya masih nilai asli penelitian
-   (port `COM10`, indeks kamera, eksposur). Lihat tabel di `05_akuisisi_alat/README.md`.
-5. **`measurement_error` butuh mode 0.5 mm**: saat mengolahnya, `EXPECTED_DELTA` harus
-   0.5 (sudah ditangani otomatis lewat `RUN_MODE=measurement_error`).
+1. **The calibration folder name is misleading: `dataset_kalibrasi_fix_prime_260` contains 10
+   images, not 260.** This is **not a problem for reproduction** — the K/D from those 10
+   images already reproduces all the manuscript's numbers (section 4). It is noted only so
+   that you don't go looking for the "remaining 250 images" that may indeed never have
+   existed. If the manuscript states the number of calibration images explicitly, that is
+   the number that needs to be matched.
+2. **The trace of what generated `hasil_fix_banget_baseline_XX.csv` is not preserved in the code.**
+   According to the research owner, this baseline CSV was produced by the **same code**
+   (`virtualencodervideo`), differing only in the **input video** (`BASELINE_JALUR_FINAL_VIDEO`)
+   and the **output CSV path**. In the remaining code, no notebook writes that filename —
+   they all only read it (confirmed by searching the entire set of notebooks). So the baseline
+   path and the calibrated path use the same script, and what differs is only the parameters
+   at the top of the script. In this repo both have been unified via
+   `config_paths.py`: `KALIBRASI_VIDEO` and `KALIBRASI_CSV_PREFIX`.
+4. **The acquisition scripts are not yet parameterized.** They still contain the research's original
+   values (port `COM10`, camera index, exposure). See the table in `05_data_acquisition/README.md`.
+5. **`measurement_error` needs the 0.5 mm mode**: when processing it, `EXPECTED_DELTA` must
+   be 0.5 (already handled automatically via `RUN_MODE=measurement_error`).
 
-## 9. Yang tervalidasi vs belum
+## 9. What is validated vs not yet
 
-| Bagian | Status |
+| Section | Status |
 |---|---|
-| Kalibrasi kamera (tahap 1) | dijalankan ulang dari data di repo, berhasil, menulis 4 CSV |
-| Kalibrasi mesin (tahap 2, mode `calibrated`) | dijalankan ulang, **identik digit-per-digit** dengan log naskah |
-| Evaluasi lintasan (tahap 4) | dijalankan ulang, berhasil, perbaikan 54.24 % |
-| Virtual encoder (tahap 3) | bootstrap + pemuatan K/D dari CSV diuji, berhasil. **Pemrosesan video sengaja tidak dijalankan** — videonya 1.7 GB dan grafnya sudah tidak diperlukan karena CSV lintasan tersedia |
-| Measurement error (dial gauge vs VE) | dijalankan ulang, berhasil, gambar keluaran **identik** dengan gambar naskah (2584x2134 px) |
-| Kalibrasi mesin mode `baseline` dan `measurement_error` | belum dijalankan ulang — datasetnya lengkap, tinggal ganti `KALIBRASI_MODE` |
-| Skrip akuisisi (folder 05) | tidak dapat dijalankan tanpa mesin |
+| Camera calibration (stage 1) | re-run from the data in the repo, succeeded, wrote 4 CSVs |
+| Machine calibration (stage 2, `calibrated` mode) | re-run, **identical digit-for-digit** to the manuscript log |
+| Trajectory evaluation (stage 4) | re-run, succeeded, improvement 54.24 % |
+| Virtual encoder (stage 3) | bootstrap + loading K/D from CSV was tested, succeeded. **Video processing was deliberately not run** — the videos are 1.7 GB and the plots are no longer needed because the trajectory CSVs are available |
+| Measurement error (dial gauge vs VE) | re-run, succeeded, output figure **identical** to the manuscript's figure (2584x2134 px) |
+| Machine calibration in `baseline` and `measurement_error` mode | not yet re-run — the dataset is complete, just change `KALIBRASI_MODE` |
+| Acquisition scripts (folder 05) | cannot be run without the machine |
 
 ---
 
-## 10. Kalau ada yang tidak jalan
+## 10. If something doesn't work
 
-| Gejala | Penyebab paling mungkin |
+| Symptom | Most likely cause |
 |---|---|
-| `config_paths.py tidak ditemukan` | notebook dijalankan dari luar folder repo. Jalankan lewat Jupyter di folder notebooknya, atau set `KALIBRASI_REPO` ke akar repo |
-| `Tidak ditemukan: .../camera_calibration/camera_matrix.csv` | tahap 1 (kalibrasi kamera) belum dijalankan sampai sel ekspor selesai |
-| `TIDAK DITEMUKAN` di keluaran `python config_paths.py` | dataset belum ada di `data/raw/`; taruh sesuai `data/MANIFEST.md` |
-| Banyak sampel "pose tidak ditemukan" | pencahayaan/eksposur berbeda dari waktu pengambilan data, atau papan tidak seluruhnya masuk frame |
-| `ModuleNotFoundError: cv2` lalu `has no attribute 'ximgproc'` | yang terpasang `opencv-python`, bukan `opencv-contrib-python` |
-| Kalibrasi kamera menghasilkan K/D yang jauh berbeda | jumlah citra kalibrasi hanya 10 (lihat bagian 8 butir 1) |
+| `config_paths.py not found` | the notebook was run from outside the repo folder. Run it via Jupyter in its notebook folder, or set `KALIBRASI_REPO` to the repo root |
+| `Not found: .../camera_calibration/camera_matrix.csv` | stage 1 (camera calibration) has not been run through to the end of the export cell |
+| `NOT FOUND` in the output of `python config_paths.py` | the dataset is not yet in `data/raw/`; place it as described in `data/MANIFEST.md` |
+| Many samples "pose not found" | lighting/exposure differs from when the data was acquired, or the board does not fully fit in the frame |
+| `ModuleNotFoundError: cv2` then `has no attribute 'ximgproc'` | `opencv-python` is installed, not `opencv-contrib-python` |
+| Camera calibration produces very different K/D | the number of calibration images is only 10 (see section 8 item 1) |

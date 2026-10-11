@@ -7,23 +7,23 @@ import cv2
 import serial
 
 # =====================================================================
-# --- KONFIGURASI PARAMETER KINEMATIKA & SERIAL ---
+# --- KINEMATICS & SERIAL PARAMETER CONFIGURATION ---
 # =====================================================================
 PORT = "COM10"
 BAUDRATE = 115200
 
 BACKLASH_X = 0.0133
 BACKLASH_Y = 0.0244 + 0.0070
-SKEW_X_ON_Y = -0.009200  # Drift sumbu X saat sumbu Y bergerak
-SKEW_Y_ON_X = 0.009213  # Drift sumbu Y saat sumbu X bergerak
+SKEW_X_ON_Y = -0.009200  # X-axis drift when the Y axis moves
+SKEW_Y_ON_X = 0.009213  # Y-axis drift when the X axis moves
 
 STEPX = 79.72
 STEPY = 80.40
 
-TOTAL_ITERASI = 10  # Jumlah pengulangan otomatis dari homing
+TOTAL_ITERASI = 10  # Number of automatic repetitions starting from homing
 # =====================================================================
 
-# Variabel Global untuk Sinkronisasi antar Thread
+# Global Variable for Synchronization between Threads
 program_running = True
 
 
@@ -40,7 +40,7 @@ state = RecorderState()
 
 
 # =====================================================================
-# --- FUNGSI KINEMATIKA & GENERATOR PATH ---
+# --- KINEMATICS FUNCTIONS & PATH GENERATOR ---
 # =====================================================================
 def get_ellipse_point(center_x, center_y, a, b, angle_deg, t):
     angle_rad = math.radians(angle_deg)
@@ -122,20 +122,20 @@ def precompute_ellipse_commands():
     t_start_1 = math.atan2(a, b)
     t_start_2 = math.atan2(-a, b)
 
-    # Hitung offset Y secara presisi matematis pada titik potong/persimpangan
-    # Pada t_start_1 dengan rotasi 45 derajat, x_offset = 0 dan y_offset approx 3.162277...
+    # Compute the Y offset mathematically precisely at the intersection point
+    # At t_start_1 with a 45-degree rotation, x_offset = 0 and y_offset approx 3.162277...
     _, y_offset = get_ellipse_point(0, 0, a, b, 45, t_start_1)
 
-    # Geser pusat elips ke bawah agar titik persimpangan jatuh tepat di koordinat (150.0, 150.0)
+    # Shift the ellipse center downward so the intersection point falls exactly at coordinate (150.0, 150.0)
     center_x = 150.0
     center_y = 150.0 - y_offset
 
     commands = [
-        "G1 X150.0000 Y150.0000 F500 ; Mulai tepat dari titik referensi (persimpangan)"
+        "G1 X150.0000 Y150.0000 F500 ; Start exactly from the reference point (intersection)"
     ]
     cur_dir_x, cur_dir_y = 1, 1
 
-    # Putaran 1: Maju
+    # Loop 1: Forward
     p1, cur_dir_x, cur_dir_y = generate_path(
         center_x,
         center_y,
@@ -165,7 +165,7 @@ def precompute_ellipse_commands():
     )
     commands.extend(p2)
 
-    # Putaran 2: Mundur
+    # Loop 2: Reverse
     p3, cur_dir_x, cur_dir_y = generate_path(
         center_x,
         center_y,
@@ -195,15 +195,15 @@ def precompute_ellipse_commands():
     )
     commands.extend(p4)
 
-    commands.append("G1 X150.0000 Y150.0000 F500 ; Kembali ke origin")
+    commands.append("G1 X150.0000 Y150.0000 F500 ; Return to origin")
     return commands
 
 # =====================================================================
-# --- THREAD 2: WORKER PENGENDALI CNC ---
+# --- THREAD 2: CNC CONTROLLER WORKER ---
 # =====================================================================
 def send_gcode(ser, cmd):
     global program_running
-    print(f"Mengirim: {cmd} ", end="", flush=True)
+    print(f"Sending: {cmd} ", end="", flush=True)
     ser.write((cmd + "\n").encode("utf-8"))
 
     while program_running:
@@ -212,7 +212,7 @@ def send_gcode(ser, cmd):
             if "busy: processing" in line.lower():
                 print(".", end="", flush=True)
             else:
-                print(f"\nMesin: {line}")
+                print(f"\nMachine: {line}")
                 if line.lower().startswith("ok"):
                     break
 
@@ -228,10 +228,10 @@ def cnc_worker_thread(ellipse_commands):
                 break
 
             print(
-                f"\n" + "=" * 50 + f"\n=== MEMULAI ITERASI OTOMATIS {loop_idx}/{TOTAL_ITERASI} ===\n" + "=" * 50
+                f"\n" + "=" * 50 + f"\n=== STARTING AUTOMATIC ITERATION {loop_idx}/{TOTAL_ITERASI} ===\n" + "=" * 50
             )
 
-            # 1. Tahap Setup & Homing
+            # 1. Setup & Homing Stage
             send_gcode(printer, f"M92 X{STEPX} Y{STEPY}")
             send_gcode(printer, "G21")
             send_gcode(printer, "G90")
@@ -241,43 +241,43 @@ def cnc_worker_thread(ellipse_commands):
             )
 
             print(
-                f"\n[CNC] Menunggu stabilisasi 5 detik (G4 P5000)..."
+                f"\n[CNC] Waiting 5 seconds for stabilization (G4 P5000)..."
             )
             send_gcode(printer, "G4 P5000")
 
             if not program_running:
                 break
 
-            # 2. Trigger Mulai Rekam Kamera
+            # 2. Trigger Start Camera Recording
             state.cmd_start = True
             while not state.is_recording and program_running:
                 time.sleep(0.005)
             state.cmd_start = False
 
-            # ---> JEDA 1 DETIK AWAL (REKAMAN SUDAH JALAN, MESIN MASIH DIAM) <---
-            print("\n[CNC] Merekam baseline awal (Jeda diam 1 detik)...")
+            # ---> INITIAL 1-SECOND PAUSE (RECORDING IS RUNNING, THE MACHINE IS STILL) <---
+            print("\n[CNC] Recording initial baseline (1-second still pause)...")
             time.sleep(1.0)
 
-            # 3. Eksekusi Lintasan Elips
+            # 3. Execute the Ellipse Trajectory
             print(
-                f"\n[CNC] Menjalankan lintasan elips terkompensasi..."
+                f"\n[CNC] Running the compensated ellipse trajectory..."
             )
             for cmd in ellipse_commands:
                 if not program_running:
                     break
                 send_gcode(printer, cmd)
 
-            # Tunggu semua pergerakan fisik motor selesai
+            # Wait for all physical motor movements to finish
             send_gcode(printer, "M400")
 
             if not program_running:
                 break
 
-            # ---> JEDA 1 DETIK AKHIR (MESIN SUDAH DIAM, REKAMAN MASIH JALAN) <---
-            print("\n[CNC] Merekam baseline akhir (Jeda diam 1 detik)...")
+            # ---> FINAL 1-SECOND PAUSE (THE MACHINE IS STILL, RECORDING IS STILL RUNNING) <---
+            print("\n[CNC] Recording final baseline (1-second still pause)...")
             time.sleep(1.0)
 
-            # 4. Trigger Berhenti Rekam
+            # 4. Trigger Stop Recording
             state.cmd_stop = True
             while state.is_recording and program_running:
                 time.sleep(0.005)
@@ -286,25 +286,25 @@ def cnc_worker_thread(ellipse_commands):
             state.vid_counter += 1
 
         print(
-            f"\n=== SELURUH {TOTAL_ITERASI} ITERASI SELESAI DENGAN SUKSES ==="
+            f"\n=== ALL {TOTAL_ITERASI} ITERATIONS COMPLETED SUCCESSFULLY ==="
         )
 
     except Exception as e:
-        print(f"\n[!] Terjadi Error pada CNC Worker: {e}")
+        print(f"\n[!] An Error Occurred in the CNC Worker: {e}")
     finally:
         program_running = False
         if "printer" in locals() and printer.is_open:
             printer.close()
-            print("[CNC] Koneksi Serial ditutup.")
+            print("[CNC] Serial connection closed.")
 
 
 # =====================================================================
-# --- THREAD 1 (MAIN): PENGAMBILAN FRAME & VIDEO WRITER ---
+# --- THREAD 1 (MAIN): FRAME GRABBING & VIDEO WRITER ---
 # =====================================================================
 def main():
     global program_running
 
-    print("Menghitung titik koordinat elips...")
+    print("Computing ellipse coordinate points...")
     ellipse_commands = precompute_ellipse_commands()
 
     waktu_sesi = datetime.now().strftime("%Y%m%d_%H%M%S")
@@ -315,9 +315,9 @@ def main():
     os.makedirs(folder_kalibrasi, exist_ok=True)
     os.makedirs(folder_video, exist_ok=True)
 
-    print(f"=== SESI REKAMAN OTOMATIS DIMULAI ===")
-    print(f"Folder Utama   : {base_folder}")
-    print(f"Folder Video   : {folder_video}\n")
+    print(f"=== AUTOMATED RECORDING SESSION STARTED ===")
+    print(f"Main Folder   : {base_folder}")
+    print(f"Video Folder  : {folder_video}\n")
 
     cap = cv2.VideoCapture(0)
     cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
@@ -332,15 +332,15 @@ def main():
     actual_height = cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
     actual_fps = cap.get(cv2.CAP_PROP_FPS)
     print(
-        f"Kamera aktif pada: {int(actual_width)}x{int(actual_height)} @ {actual_fps} FPS\n"
+        f"Camera active at: {int(actual_width)}x{int(actual_height)} @ {actual_fps} FPS\n"
     )
 
     out = None
     img_counter = 0
 
-    print("--- KONTROL DARURAT ---")
-    print("[f] Capture Gambar Manual (PNG)")
-    print("[q] Batalkan & Keluar dari Program\n")
+    print("--- EMERGENCY CONTROL ---")
+    print("[f] Capture Manual Image (PNG)")
+    print("[q] Cancel & Exit the Program\n")
 
     cnc_thread = threading.Thread(
         target=cnc_worker_thread, args=(ellipse_commands,)
@@ -350,7 +350,7 @@ def main():
     while program_running:
         ret, frame = cap.read()
         if not ret:
-            print("[!] Gagal mengambil frame dari kamera.")
+            print("[!] Failed to grab a frame from the camera.")
             program_running = False
             break
 
@@ -375,7 +375,7 @@ def main():
                 isColor=False,
             )
             state.is_recording = True
-            print(f"\n[KAMERA] MULAI merekam ke: {vid_name}")
+            print(f"\n[CAMERA] STARTED recording to: {vid_name}")
 
         # TRIGGER STOP
         if state.cmd_stop and state.is_recording:
@@ -384,10 +384,10 @@ def main():
                 out.release()
                 out = None
             print(
-                f"[KAMERA] BERHENTI merekam. Video {state.vid_counter:02d} selesai."
+                f"[CAMERA] STOPPED recording. Video {state.vid_counter:02d} complete."
             )
 
-        # PENULISAN FRAME
+        # FRAME WRITING
         if state.is_recording and out is not None:
             cv2.circle(display_frame, (30, 30), 10, (0, 0, 255), -1)
             cv2.putText(
@@ -405,7 +405,7 @@ def main():
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord("q"):
-            print("\n[!] Pengguna membatalkan eksekusi (Tombol Q).")
+            print("\n[!] User cancelled the execution (Q key).")
             program_running = False
             break
         elif key == ord("f"):
@@ -413,7 +413,7 @@ def main():
                 folder_kalibrasi, f"calib_manual_{img_counter:04d}.png"
             )
             cv2.imwrite(img_name, gray_frame)
-            print(f"[KAMERA] Disimpan: {img_name}")
+            print(f"[CAMERA] Saved: {img_name}")
             img_counter += 1
 
     program_running = False
@@ -423,7 +423,7 @@ def main():
     if out is not None:
         out.release()
     cv2.destroyAllWindows()
-    print("[KAMERA] Sistem dimatikan dengan aman.")
+    print("[CAMERA] System shut down safely.")
 
 
 if __name__ == "__main__":

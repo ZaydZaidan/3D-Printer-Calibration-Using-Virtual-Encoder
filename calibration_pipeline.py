@@ -1,14 +1,14 @@
-"""Pipeline deteksi sudut papan catur "sesuai paper".
+"""Chessboard corner detection pipeline "as per the paper".
 
-Diekstrak dari kode penelitian asli tanpa mengubah isinya. Fungsi-fungsi ini dipakai
-bersama oleh:
-  - 01_camera_calibration_paper/kalibrasi_kamera.ipynb  (kalibrasi kamera)
-  - 02_machine_calibration/kalibrasi_mesin.ipynb        (kalibrasi mesin)
+Extracted from the original research code without changing its contents. These
+functions are shared by:
+  - 01_camera_calibration/camera_calibration.ipynb  (camera calibration)
+  - 02_machine_calibration/machine_calibration.ipynb        (machine calibration)
   - 03_virtual_encoder/...                              (virtual encoder)
 
-Tahapan: EDLines -> line screening -> subpixel -> pengurutan sudut via homografi.
+Stages: EDLines -> line screening -> subpixel -> corner ordering via homography.
 
-Memerlukan opencv-contrib (cv2.ximgproc).
+Requires opencv-contrib (cv2.ximgproc).
 """
 
 import cv2
@@ -149,7 +149,7 @@ def sort_corners_robust_paper(corners, gray_img, grid_size):
     if len(candidates) < 3:
         return None
 
-    # --- 1. Filter 49 Titik Terdekat dengan Pusat (Buang Noise Background) ---
+    # --- 1. Keep the 49 Points Closest to the Center (Discard Background Noise) ---
     candidate_scores = []
     for center in candidates:
         center_pt = np.array(center)
@@ -159,22 +159,22 @@ def sort_corners_robust_paper(corners, gray_img, grid_size):
     candidate_scores.sort(key=lambda x: x[0])
     top3 = np.array([x[1] for x in candidate_scores[:3]])
 
-    # Cari origin tengah kasar untuk filter jarak
+    # Find a rough center origin for the distance filter
     origin_approx = np.mean(top3, axis=0) 
     dists_to_origin = np.linalg.norm(corners - origin_approx, axis=1)
     
     m_expected = grid_size[0] * grid_size[1]
     true_corners = corners[np.argsort(dists_to_origin)[:m_expected]]
 
-    # --- 2. KUNCI PERBAIKAN: Identifikasi 4 Sudut Berdasarkan Koordinat Gambar ---
-    # Kita paksa mencari ujung berdasarkan sumbu X dan Y dari gambar itu sendiri
+    # --- 2. KEY FIX: Identify the 4 Corners Based on Image Coordinates ---
+    # We force the extremes to be searched along the image's own X and Y axes
     sum_coords = true_corners[:, 0] + true_corners[:, 1]
     diff_coords = true_corners[:, 0] - true_corners[:, 1]
     
-    tl_idx = np.argmin(sum_coords)  # Top-Left (Kiri-Atas, X+Y terkecil)
-    br_idx = np.argmax(sum_coords)  # Bottom-Right (Kanan-Bawah, X+Y terbesar)
-    tr_idx = np.argmax(diff_coords) # Top-Right (Kanan-Atas, X-Y terbesar)
-    bl_idx = np.argmin(diff_coords) # Bottom-Left (Kiri-Bawah, X-Y terkecil)
+    tl_idx = np.argmin(sum_coords)  # Top-Left (X+Y smallest)
+    br_idx = np.argmax(sum_coords)  # Bottom-Right (X+Y largest)
+    tr_idx = np.argmax(diff_coords) # Top-Right (X-Y largest)
+    bl_idx = np.argmin(diff_coords) # Bottom-Left (X-Y smallest)
     
     src_pts = np.array([
         true_corners[tl_idx],
@@ -183,7 +183,7 @@ def sort_corners_robust_paper(corners, gray_img, grid_size):
         true_corners[bl_idx]
     ], dtype=np.float32)
     
-    # Grid 2D ideal (0,0 ada di Kiri-Atas)
+    # Ideal 2D grid (0,0 is at the Top-Left)
     dst_pts = np.array([
         [0, 0],
         [grid_size[0] - 1, 0],
@@ -198,7 +198,7 @@ def sort_corners_robust_paper(corners, gray_img, grid_size):
     sorted_corners = []
     used_indices = set()
     
-    # Looping wajib: Baris dulu (Y), baru Kolom (X) agar sinkron dengan objp (kiri->kanan, atas->bawah)
+    # Mandatory looping: rows first (Y), then columns (X) to stay in sync with objp (left->right, top->bottom)
     for row in range(grid_size[1]):
         for col in range(grid_size[0]):
             ideal_pt = cv2.perspectiveTransform(np.array([[[col, row]]], dtype=np.float32), H)[0][0]

@@ -1,129 +1,129 @@
-# MANIFEST DATA
+# DATA MANIFEST
 
-Pemetaan dataset: nama asli (di `After Lulus Paper/Data/`) -> nama di repo ini.
-Semua dataset citra/video **tidak masuk git** (lihat `.gitignore`); yang masuk git
-hanya CSV hasil olahan di `data/processed/`.
+Dataset mapping: original name (in `After Lulus Paper/Data/`) -> name in this repo.
+All image/video datasets **are not tracked in git** (see `.gitignore`); only the processed
+CSVs in `data/processed/` are tracked in git.
 
-## 1. Kalibrasi kamera
+## 1. Camera calibration
 
-| Nama di repo | Nama asli | Isi | Ukuran | Git |
+| Name in repo | Original name | Contents | Size | Git |
 |---|---|---|---|---|
-| `camera_calibration/dataset_kalibrasi_fix_prime_260/` | `dataset_kalibrasi_fix_prime_260` | 10 citra `calib_XXXX.png` + margin hitam | kecil | ya |
-| `camera_calibration/dataset_kalibrasi_ditambah/` | `dataset_kalibrasi_ditambah` | 97 citra `oriy/fwd/bck` | ~20 MB | tidak |
+| `camera_calibration/dataset_kalibrasi_fix_prime_260/` | `dataset_kalibrasi_fix_prime_260` | 10 `calib_XXXX.png` images + black margin | small | yes |
+| `camera_calibration/dataset_kalibrasi_ditambah/` | `dataset_kalibrasi_ditambah` | 97 `oriy/fwd/bck` images | ~20 MB | no |
 
-> Catatan: nama folder `fix_prime_260` menyiratkan 260 citra, isinya hanya 10.
-> Perlu dikonfirmasi apakah ini dataset yang menghasilkan angka di naskah.
+> Note: the folder name `fix_prime_260` implies 260 images, but it only contains 10.
+> Needs confirmation whether this is the dataset that produces the numbers in the manuscript.
 
-## 2. Pengujian linear (kalibrasi mesin) - TERKONFIRMASI penulis
+## 2. Linear testing (machine calibration) - CONFIRMED by the author
 
-| Nama di repo | Nama asli | Sumbu | Kondisi | File | Ukuran | Git |
+| Name in repo | Original name | Axis | Condition | Files | Size | Git |
 |---|---|---|---|---|---|---|
-| `linear_baseline_x/` | `BASELINE_X_INDIVIDUAL` | X | baseline | 120 | 22 MB | tidak |
-| `linear_baseline_y/` | `BASELINE_Y_FIX_METHOD` | Y | baseline | 120 | 22 MB | tidak |
-| `linear_calibrated_x/` | `X_LAST_FIX` | X | setelah kalibrasi | 120 | 22 MB | tidak |
-| `linear_calibrated_y/` | `Y_LAST_FIX` | Y | setelah kalibrasi | 120 | 21 MB | tidak |
+| `linear_baseline_x/` | `BASELINE_X_INDIVIDUAL` | X | baseline | 120 | 22 MB | no |
+| `linear_baseline_y/` | `BASELINE_Y_FIX_METHOD` | Y | baseline | 120 | 22 MB | no |
+| `linear_calibrated_x/` | `X_LAST_FIX` | X | after calibration | 120 | 22 MB | no |
+| `linear_calibrated_y/` | `Y_LAST_FIX` | Y | after calibration | 120 | 21 MB | no |
 
-Tiap folder berisi 40 triplet: `oriy{i}.png`, `fwd{i}.png`, `bck{i}.png` (i = 1..40),
-sesuai `FILE_INDICES = list(range(1, 41))` di notebook kalibrasi mesin.
+Each folder contains 40 triplets: `oriy{i}.png`, `fwd{i}.png`, `bck{i}.png` (i = 1..40),
+matching `FILE_INDICES = list(range(1, 41))` in the machine calibration notebook.
 
-## 3. Measurement error (sebelumnya "systematic error") - RENAME DISETUJUI penulis
+## 3. Measurement error (previously "systematic error") - RENAME APPROVED by the author
 
-Dipakai untuk membandingkan pembacaan metode ini dengan **dial gauge**.
-Konfigurasi: parameter baseline semua (backlash comp 0, skew comp 0, steps/mm 80),
-dan **jarak gerak diperkecil menjadi 0.5 mm** (bukan 10 mm).
+Used to compare this method's reading with a **dial gauge**.
+Configuration: all baseline parameters (backlash comp 0, skew comp 0, steps/mm 80),
+and the **travel distance reduced to 0.5 mm** (not 10 mm).
 
-| Nama di repo | Nama asli | Isi | File | Ukuran | Git |
+| Name in repo | Original name | Contents | Files | Size | Git |
 |---|---|---|---|---|---|
-| `measurement_error/x_camera_calibration/` | `kalibrator_systematic_error_x` | dataset kalibrasi kamera untuk sesi ini | 54 | 11 MB | tidak |
-| `measurement_error/x_machine_movement/` | `systematic_error_x` | hasil pergerakan mesin sumbu X | 120 | 24 MB | tidak |
-| `measurement_error/y_camera_calibration/` | `kalibrator_systematic_y` | dataset kalibrasi kamera untuk sesi ini | 31 | 5.4 MB | tidak |
-| `measurement_error/y_machine_movement/` | `systematic_error_Y` | hasil pergerakan mesin sumbu Y | 120 | 21 MB | tidak |
-| `measurement_error/x_dial_gauge/` | `Semester 8/.../images/Hasil/Kalibrator_x` | 15 foto dial gauge sumbu X (`orix/fwd/bck` 1-5) + 3 gambar visualisasi | 18 | kecil | tidak |
-| `measurement_error/y_dial_gauge/` | `Semester 8/.../images/Hasil/Kalibrator_y` | 15 foto dial gauge sumbu Y (`oriy/fwd/bck` 1-5) + 3 gambar visualisasi | 18 | kecil | tidak |
+| `measurement_error/x_camera_calibration/` | `kalibrator_systematic_error_x` | camera calibration dataset for this session | 54 | 11 MB | no |
+| `measurement_error/x_machine_movement/` | `systematic_error_x` | machine movement result for the X axis | 120 | 24 MB | no |
+| `measurement_error/y_camera_calibration/` | `kalibrator_systematic_y` | camera calibration dataset for this session | 31 | 5.4 MB | no |
+| `measurement_error/y_machine_movement/` | `systematic_error_Y` | machine movement result for the Y axis | 120 | 21 MB | no |
+| `measurement_error/x_dial_gauge/` | `Semester 8/.../images/Hasil/Kalibrator_x` | 15 dial gauge photos of the X axis (`orix/fwd/bck` 1-5) + 3 visualization images | 18 | small | no |
+| `measurement_error/y_dial_gauge/` | `Semester 8/.../images/Hasil/Kalibrator_y` | 15 dial gauge photos of the Y axis (`oriy/fwd/bck` 1-5) + 3 visualization images | 18 | small | no |
 
-> Yang menghasilkan dataset ini: `otomasikalibrasi.py` dengan `TEST_MODE = 'X+'` / `'Y+'`,
-> di mana `fwd_move = (0.5, 0.0)` / `(0.0, 0.5)` — inilah bukti jarak 0.5 mm di kode.
-> Untuk mengolahnya di notebook kalibrasi mesin, pilih `KALIBRASI_MODE=measurement_error`
-> (otomatis memakai target 0.5 mm dan steps/mm baseline).
+> What produced this dataset: `otomasikalibrasi.py` with `TEST_MODE = 'X+'` / `'Y+'`,
+> where `fwd_move = (0.5, 0.0)` / `(0.0, 0.5)` — this is the evidence of the 0.5 mm distance in the code.
+> To process it in the machine calibration notebook, select `KALIBRASI_MODE=measurement_error`
+> (automatically uses a 0.5 mm target and baseline steps/mm).
 >
-> `*_camera_calibration/` berasal dari `otomasikalibrasi.py`; `*_dial_gauge/` adalah FOTO
-> dial gauge yang dipakai untuk menghitung measurement error. Angka hasil pembandingnya
-> ada di `data/processed/measurement_error/dial_vs_ve.csv`.
+> `*_camera_calibration/` comes from `otomasikalibrasi.py`; `*_dial_gauge/` are PHOTOS
+> of the dial gauge used to compute the measurement error. The comparison result numbers
+> are in `data/processed/measurement_error/dial_vs_ve.csv`.
 
-## 4. Lintasan elips (circular)
+## 4. Ellipse path (circular)
 
-| Nama di repo | Nama asli | Isi | Ukuran | Git |
+| Name in repo | Original name | Contents | Size | Git |
 |---|---|---|---|---|
-| `circular_baseline/` | `Circular Baseline` | `hasil_fix_banget_baseline_XX.csv` + PNG | 4.1 MB | CSV ya, PNG tidak |
-| `circular_calibrated/` | `Circular Kalibrasi` | `JALUR_VIDEO_FINAL_3_XX.csv` + PNG | 8.2 MB | CSV ya, PNG tidak |
+| `circular_baseline/` | `Circular Baseline` | `hasil_fix_banget_baseline_XX.csv` + PNG | 4.1 MB | CSV yes, PNG no |
+| `circular_calibrated/` | `Circular Kalibrasi` | `JALUR_VIDEO_FINAL_3_XX.csv` + PNG | 8.2 MB | CSV yes, PNG no |
 
-Video mentahnya (tidak masuk git), sesuai penjelasan pemilik penelitian:
+The raw videos (not tracked in git), according to the research owner's explanation:
 
-| Folder di repo | Nama asli | Isi | Berkas | Ukuran |
+| Folder in repo | Original name | Contents | Files | Size |
 |---|---|---|---|---|
-| `video_baseline_x/` | `BASELINE_JALUR_FINAL_VIDEO` | video pengujian **circular baseline** | 21 | 970 MB |
-| `video_calibrated_x/` | `KALIBRASI_JALUR_FINAL_VIDEO_3` | video pengujian **circular hasil kalibrasi** | 11 | 547 MB |
-| `video_kalibrasi_x/` | `KALIBRASI_X_VIDEO_BENERAN` | video sumbu X (gambar naskah) | 3 | 100 MB |
-| `video_baseline_y/` | `BASELINE_Y_VIDEO_FINAL_BGT_BGT` | video sumbu Y baseline | 1 | 34 MB |
-| `video_calibrated_y/` | `KALIBRASI_Y_VIDEO_FINAL_BGT_BGT` | video sumbu Y terkalibrasi | 1 | 38 MB |
+| `video_baseline_x/` | `BASELINE_JALUR_FINAL_VIDEO` | test video of the **circular baseline** | 21 | 970 MB |
+| `video_calibrated_x/` | `KALIBRASI_JALUR_FINAL_VIDEO_3` | test video of the **calibrated circular** result | 11 | 547 MB |
+| `video_kalibrasi_x/` | `KALIBRASI_X_VIDEO_BENERAN` | X-axis video (manuscript figure) | 3 | 100 MB |
+| `video_baseline_y/` | `BASELINE_Y_VIDEO_FINAL_BGT_BGT` | baseline Y-axis video | 1 | 34 MB |
+| `video_calibrated_y/` | `KALIBRASI_Y_VIDEO_FINAL_BGT_BGT` | calibrated Y-axis video | 1 | 38 MB |
 
-Total 37 berkas / 1.7 GB. **Tidak perlu diproses ulang** untuk mereproduksi hasil
-penelitian — CSV lintasan sudah ada di `circular_baseline/` dan `circular_calibrated/`.
-(`HASIL_PENGUJIAN_LINTASAN` tidak disalin karena isinya gambar evaluasi, bukan video.)
+Total 37 files / 1.7 GB. **No need to reprocess** to reproduce the research
+results — the path CSVs already exist in `circular_baseline/` and `circular_calibrated/`.
+(`HASIL_PENGUJIAN_LINTASAN` is not copied because its contents are evaluation images, not videos.)
 
-## 5. Keluaran olahan (masuk git)
+## 5. Processed outputs (tracked in git)
 
-| Berkas | Isi | Ukuran |
+| File | Contents | Size |
 |---|---|---|
-| `processed/camera_calibration/camera_matrix.csv` | matriks intrinsik K 3x3 | kecil |
-| `processed/camera_calibration/dist_coeffs.csv` | koefisien distorsi 1x5 | kecil |
-| `processed/camera_calibration/camera_params.csv` | tabel parameter/nilai + ukuran citra | kecil |
-| `processed/camera_calibration/reprojection_rmse.csv` | RMSE reprojection per citra | kecil |
-| `processed/virtual_encoder/*.csv` | CSV lintasan untuk gambar naskah | kecil |
-| `processed/measurement_error/dial_vs_ve.csv` | 20 baris pembanding dial gauge vs VE | kecil |
+| `processed/camera_calibration/camera_matrix.csv` | 3x3 intrinsic matrix K | small |
+| `processed/camera_calibration/dist_coeffs.csv` | 1x5 distortion coefficients | small |
+| `processed/camera_calibration/camera_params.csv` | parameter/value table + image size | small |
+| `processed/camera_calibration/reprojection_rmse.csv` | reprojection RMSE per image | small |
+| `processed/virtual_encoder/*.csv` | path CSVs for the manuscript figures | small |
+| `processed/measurement_error/dial_vs_ve.csv` | 20 rows comparing dial gauge vs VE | small |
 
-## 6. Duplikat di `SEMPRO/Code/`
+## 6. Duplicates in `SEMPRO/Code/`
 
-Folder `systematic_error_x`, `systematic_error_Y`, `kalibrator_systematic_error_x`,
+The folders `systematic_error_x`, `systematic_error_Y`, `kalibrator_systematic_error_x`,
 `kalibrator_systematic_y`, `X_LAST_FIX`, `Y_LAST_FIX`, `X_LAST`, `Y_LAST`,
 `BASELINE_X_FIX_METHOD`, `BASELINE_Y_FIX_METHOD`, `KALIBRASI_X_SKEW_1_FIX`,
-`KALIBRASI_X_STEPBACK_1_FIX_METHOD`, `KALIBRASI_Y_STEPBACK_1_FIX_METHOD` semuanya
-punya salinan di `After Lulus Paper/Data/`. **Rujukan final = `After Lulus Paper/Data/`**;
-yang di `Code/` dianggap arsip kerja.
+`KALIBRASI_X_STEPBACK_1_FIX_METHOD`, `KALIBRASI_Y_STEPBACK_1_FIX_METHOD` all
+have copies in `After Lulus Paper/Data/`. **Final reference = `After Lulus Paper/Data/`**;
+the ones in `Code/` are considered working archives.
 
 ---
 
-## 7. Unduhan data mentah (untuk handoff)
+## 7. Raw data download (for handoff)
 
-Repo git sengaja **tidak** memuat data mentah yang besar.
+The git repo deliberately does **not** include the large raw data.
 
-**Tautan Google Drive:** https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing
+**Google Drive link:** https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing
 
-(folder bernama `raw`, berisi seluruh isi `data/raw/`). Unduh, lalu taruh isinya sesuai
-kolom "nama di repo" di atas.
+(a folder named `raw`, containing the entire contents of `data/raw/`). Download it, then place the contents according to
+the "name in repo" column above.
 
-| Paket | Isi | Ukuran | Tautan |
+| Package | Contents | Size | Link |
 |---|---|---|---|
-| Video lintasan | 5 folder `video_*` (37 berkas) | 1.7 GB | [https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing](https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing) |
-| Citra + CSV mentah | `camera_calibration/`, `linear_*`, `measurement_error/`, `circular_*` | 183 MB | termasuk folder Drive di atas |
+| Path videos | 5 `video_*` folders (37 files) | 1.7 GB | [https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing](https://drive.google.com/drive/folders/1-t_4XDX1aLUvNeTrkfXd1f1-iWcVR9tP?usp=sharing) |
+| Images + raw CSV | `camera_calibration/`, `linear_*`, `measurement_error/`, `circular_*` | 183 MB | included in the Drive folder above |
 
-**Cara memakai:** unduh, ekstrak, lalu letakkan isinya **langsung di dalam** `data/raw/`
-sehingga strukturnya menjadi `data/raw/linear_baseline_x/...`,
-`data/raw/video_baseline_x/...`, dan seterusnya. Verifikasi dengan:
+**How to use:** download, extract, then place the contents **directly inside** `data/raw/`
+so that the structure becomes `data/raw/linear_baseline_x/...`,
+`data/raw/video_baseline_x/...`, and so on. Verify with:
 
 ```bash
 python config_paths.py
 ```
 
-Semua baris harus berstatus `OK`. Kalau ada yang `TIDAK DITEMUKAN`, lokasinya akan
-ditunjukkan di kolom terakhir.
+All lines must have the status `OK`. If any is `NOT FOUND`, its location will be
+shown in the last column.
 
-**Cek kelengkapan paket video** (agar tidak ada berkas yang tertinggal saat mengunggah):
+**Check the completeness of the video package** (so that no file is left behind when uploading):
 
-| Folder | Nama asli | Harus berisi |
+| Folder | Original name | Must contain |
 |---|---|---|
-| `video_baseline_x/` | `BASELINE_JALUR_FINAL_VIDEO` | 21 berkas `pose_video_01..21.avi` |
-| `video_calibrated_x/` | `KALIBRASI_JALUR_FINAL_VIDEO_3` | 11 berkas (`pose_video_01..10.avi` + `pose_video_01 - KALIBRASI.avi`) |
-| `video_kalibrasi_x/` | `KALIBRASI_X_VIDEO_BENERAN` | 3 berkas |
-| `video_baseline_y/` | `BASELINE_Y_VIDEO_FINAL_BGT_BGT` | 1 berkas |
-| `video_calibrated_y/` | `KALIBRASI_Y_VIDEO_FINAL_BGT_BGT` | 1 berkas |
+| `video_baseline_x/` | `BASELINE_JALUR_FINAL_VIDEO` | 21 files `pose_video_01..21.avi` |
+| `video_calibrated_x/` | `KALIBRASI_JALUR_FINAL_VIDEO_3` | 11 files (`pose_video_01..10.avi` + `pose_video_01 - KALIBRASI.avi`) |
+| `video_kalibrasi_x/` | `KALIBRASI_X_VIDEO_BENERAN` | 3 files |
+| `video_baseline_y/` | `BASELINE_Y_VIDEO_FINAL_BGT_BGT` | 1 file |
+| `video_calibrated_y/` | `KALIBRASI_Y_VIDEO_FINAL_BGT_BGT` | 1 file |

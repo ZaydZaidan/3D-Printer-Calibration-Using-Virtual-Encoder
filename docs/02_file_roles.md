@@ -1,156 +1,156 @@
-# Peran Setiap File — Hasil Konfirmasi
+# Role of Each File — Confirmation Results
 
-Diisi bertahap sambil penulis menunjuk file mana yang benar-benar dipakai.
-Status: **terkonfirmasi** = dinyatakan langsung penulis; **dugaan** = disimpulkan dari isi
-kode/nama dataset; **belum** = menunggu penunjukan.
+Filled in gradually as the author pointed out which files are actually used.
+Status: **confirmed** = stated directly by the author; **suspected** = inferred from the
+code contents/dataset names; **pending** = awaiting identification.
 
 ---
 
-## 1. `capturedatasetbiasa.py` — TERKONFIRMASI
+## 1. `capturedatasetbiasa.py` — CONFIRMED
 
-**Peran:** hanya untuk **mengambil dataset foto papan catur** sebagai bahan kalibrasi kamera.
-Tujuannya: mendapatkan **matriks intrinsik dan koefisien distorsi kamera** (profiling kamera).
+**Role:** only for **capturing the chessboard photo dataset** as material for camera calibration.
+Goal: to obtain the **camera intrinsic matrix and distortion coefficients** (camera profiling).
 
-Pernyataan penulis:
+Author's statement:
 
-> "dulu saya pakainya yang capturedatasetbiasa buat ngambil gambar dataset chessboard untuk
-> kalibrasi camera. saya cuman pake f capture foto."
+> "Back then I used the one called capturedatasetbiasa to capture the chessboard dataset images
+> for camera calibration. I only used the f key to capture photos."
 
-| Tombol | Fungsi di kode | Dipakai? |
+| Key | Function in code | Used? |
 |---|---|---|
-| `f` | Simpan ke `dataset_sesi_<timestamp>/kalibrasi/calib_XXXX.png` | **YA** |
-| `g` | Rekam video `pose_video_XX.avi` | **TIDAK** |
-| `q` | Keluar | ya |
+| `f` | Save to `dataset_sesi_<timestamp>/kalibrasi/calib_XXXX.png` | **YES** |
+| `g` | Record video `pose_video_XX.avi` | **NO** |
+| `q` | Quit | yes |
 
-Konsekuensi: semua logika video di file ini (`vid_counter`, `VideoWriter`) tidak relevan.
-Dataset video berasal dari `otomasilintasan.py` — lihat bagian 3.
+Consequence: all the video logic in this file (`vid_counter`, `VideoWriter`) is irrelevant.
+The video dataset comes from `otomasilintasan.py` — see section 3.
 
-Rantai pemakaian:
+Usage chain:
 
 ```
-capturedatasetbiasa.py (tombol f)          -> calib_XXXX.png
+capturedatasetbiasa.py (f key)             -> calib_XXXX.png
         v
-kalibrasi_kamera.ipynb (dulu kalibrasisesuaipaper.ipynb sel 0-5)
-        -> K (intrinsik) + D (distorsi) + RMSE reprojection
+camera_calibration.ipynb (formerly kalibrasisesuaipaper.ipynb cells 0-5)
+        -> K (intrinsic) + D (distortion) + reprojection RMSE
         v
-dipakai ulang oleh virtual encoder untuk solvePnP per frame
+reused by the virtual encoder for per-frame solvePnP
 ```
 
-## 2. `otomasikalibrasi.py` — TERKONFIRMASI
+## 2. `otomasikalibrasi.py` — CONFIRMED
 
-**Peran:** mengambil dataset **pengujian linear** untuk kalibrasi mesin. Dijalankan **dua kali**:
+**Role:** captures the **linear test** dataset for machine calibration. Run **twice**:
 
-| Run | Parameter | Dataset hasil | Notebook pengolah |
+| Run | Parameters | Resulting dataset | Processing notebook |
 |---|---|---|---|
-| Baseline | backlash 0, skew 0, steps/mm 80 (X dan Y) | `BASELINE_X_INDIVIDUAL` (X), `BASELINE_Y_FIX_METHOD` (Y) | `kalibrasi_mesin.ipynb` sel X / Y |
-| Setelah kalibrasi | steps/mm 79.72 (X) / 80.40 (Y) | `X_LAST_FIX` (X), `Y_LAST_FIX` (Y) | idem, ganti `base_path` + `CURRENT_STEPS_MM` |
-| Measurement error | baseline semua, **jarak gerak 0.5 mm** | `systematic_error_x`, `systematic_error_Y` | bandingkan dengan dial gauge |
+| Baseline | backlash 0, skew 0, steps/mm 80 (X and Y) | `BASELINE_X_INDIVIDUAL` (X), `BASELINE_Y_FIX_METHOD` (Y) | `machine_calibration.ipynb` X / Y cells |
+| After calibration | steps/mm 79.72 (X) / 80.40 (Y) | `X_LAST_FIX` (X), `Y_LAST_FIX` (Y) | same, change `base_path` + `CURRENT_STEPS_MM` |
+| Measurement error | all baseline, **0.5 mm travel distance** | `systematic_error_x`, `systematic_error_Y` | compare with the dial gauge |
 
-Nilai parameter terbaca langsung di kode, baris 10-26:
-blok terkomentari (baris 10-17) berisi nilai **hasil kalibrasi**, blok aktif (baris 19-26)
-berisi nilai **baseline**.
+The parameter values are read directly in the code, lines 10-26:
+the commented-out block (lines 10-17) holds the **calibration-result** values, the active block
+(lines 19-26) holds the **baseline** values.
 
-`fwd_move` per mode menentukan jarak gerak:
-`X+`/`Y+` = **0.5 mm** (dipakai untuk measurement error),
-`X-`/`Y-` = 10 mm (pengujian linear normal, dan nilai yang cocok dengan
-`EXPECTED_DELTA = 10` di notebook).
+`fwd_move` per mode determines the travel distance:
+`X+`/`Y+` = **0.5 mm** (used for the measurement error),
+`X-`/`Y-` = 10 mm (normal linear test, and the value that matches
+`EXPECTED_DELTA = 10` in the notebook).
 
-**Keluaran:** `dataset_<Xpos|Xneg|Ypos|Yneg>_sesi_<timestamp>/kalibrasi/`
-berisi `oriy{i}.png`, `fwd{i}.png`, `bck{i}.png` (i = 1..40).
+**Output:** `dataset_<Xpos|Xneg|Ypos|Yneg>_sesi_<timestamp>/kalibrasi/`
+containing `oriy{i}.png`, `fwd{i}.png`, `bck{i}.png` (i = 1..40).
 
-## 3. `otomasilintasan.py` — TERKONFIRMASI
+## 3. `otomasilintasan.py` — CONFIRMED
 
-**Peran:** menjalankan **lintasan elips** di mesin sambil merekam video, dipakai dua kali
-(parameter baseline, lalu parameter hasil kalibrasi).
+**Role:** runs the **elliptical trajectory** on the machine while recording video, used twice
+(baseline parameters, then the calibration-result parameters).
 
-- Parameter kalibrasi ada di baris 15-21 (`BACKLASH_X`, `BACKLASH_Y`, `SKEW_X_ON_Y`,
-  `SKEW_Y_ON_X`, `STEPX`, `STEPY`) — nilai inilah yang dimasukkan dari rekomendasi
-  `kalibrasi_mesin.ipynb`.
-- `TOTAL_ITERASI = 10` -> 10 video per sesi.
-- `precompute_ellipse_commands()` membangkitkan gcode elips (lihat bagian 5).
-- Di `cnc_worker_thread` baris 235 nilai `STEPX`/`STEPY` dikirim sebagai `M92`.
-- **Keluaran:** `dataset_otomatis_sesi_<timestamp>/video/pose_video_XX.avi`
-  (prefix `dataset_otomatis_sesi_` inilah penanda file ini, bukan file capture lain).
+- The calibration parameters are on lines 15-21 (`BACKLASH_X`, `BACKLASH_Y`, `SKEW_X_ON_Y`,
+  `SKEW_Y_ON_X`, `STEPX`, `STEPY`) — these are the values fed in from the
+  `machine_calibration.ipynb` recommendation.
+- `TOTAL_ITERASI = 10` -> 10 videos per session.
+- `precompute_ellipse_commands()` generates the ellipse gcode (see section 5).
+- In `cnc_worker_thread`, line 235, the `STEPX`/`STEPY` values are sent as `M92`.
+- **Output:** `dataset_otomatis_sesi_<timestamp>/video/pose_video_XX.avi`
+  (the `dataset_otomatis_sesi_` prefix is this file's marker, distinguishing it from the other capture file).
 
-> Catatan: file ini hanya menyimpan konfigurasi **hasil kalibrasi**. Konfigurasi baseline
-> tidak tersimpan di kode, hanya terekam di datasetnya.
+> Note: this file stores only the **calibration-result** configuration. The baseline
+> configuration is not stored in the code, only recorded in its dataset.
 
-## 4. `virtualencodervideo copy 2.ipynb` — TERKONFIRMASI (mata rantai yang sempat terlewat)
+## 4. `virtualencodervideo copy 2.ipynb` — CONFIRMED (a link in the chain that was initially missed)
 
-**Peran:** mengubah video lintasan **hasil kalibrasi** menjadi CSV lintasan.
-Bukan sekadar salinan eksperimen — dia bagian dari rantai final.
+**Role:** converts the **calibration-result** trajectory video into a trajectory CSV.
+Not merely an experiment copy — it is part of the final chain.
 
-- Sel 6: `VIDEO_PATH = ...\KALIBRASI_JALUR_FINAL_VIDEO_3\video\pose_video_XX.avi`
-- `CSV_OUTPUT_PATH = f"JALUR_VIDEO_FINAL_3_{video_index:02d}.csv"` -> dibaca
+- Cell 6: `VIDEO_PATH = ...\KALIBRASI_JALUR_FINAL_VIDEO_3\video\pose_video_XX.avi`
+- `CSV_OUTPUT_PATH = f"JALUR_VIDEO_FINAL_3_{video_index:02d}.csv"` -> read by
   `evaluasilintasan.ipynb`.
 
-Rantai lengkap:
+Full chain:
 
 ```
 otomasilintasan.py -> KALIBRASI_JALUR_FINAL_VIDEO_3/video/pose_video_XX.avi
         v
-virtualencodervideo copy 2.ipynb (sel 6)
+virtualencodervideo copy 2.ipynb (cell 6)
         -> JALUR_VIDEO_FINAL_3_XX.csv
         v
-evaluasilintasan.ipynb (sel 1 & 4)
+evaluasilintasan.ipynb (cells 1 & 4)
 ```
 
-Untuk baseline, jalur yang sama berujung pada `hasil_fix_banget_baseline_XX.csv`
-(sumber: `BASELINE_JALUR_FINAL_VIDEO`), tetapi **tidak ada notebook di folder yang menulis
-nama file itu** — kemungkinan hasil rename manual. Perlu dikonfirmasi.
+For the baseline, the same path ends at `hasil_fix_banget_baseline_XX.csv`
+(source: `BASELINE_JALUR_FINAL_VIDEO`), but **no notebook in the folder writes
+that file name** — possibly the result of a manual rename. Needs confirmation.
 
-## 5. Catatan konsep: soal "ekstrinsik"
+## 5. Conceptual note: on "extrinsics"
 
-Di pipeline ini **tidak ada satu matriks ekstrinsik tetap** (transformasi kamera -> mesin):
+In this pipeline there is **no single fixed extrinsic matrix** (camera -> machine transform):
 
-- `cv2.calibrateCamera()` mengembalikan `rvecs`/`tvecs` yang merupakan **pose papan terhadap
-  kamera untuk setiap citra kalibrasi** (dipakai untuk menghitung RMSE), bukan transformasi
-  tetap.
-- Kalibrasi mesin dan virtual encoder menghitung pose **ulang per citra/frame** dengan
-  `cv2.solvePnP`. Lintasan didapat dari **selisih** `tvec` terhadap `tvec` frame origin.
+- `cv2.calibrateCamera()` returns `rvecs`/`tvecs`, which are the **board pose relative to the
+  camera for each calibration image** (used to compute the RMSE), not a fixed transform.
+- Machine calibration and the virtual encoder recompute the pose **per image/frame** with
+  `cv2.solvePnP`. The trajectory is obtained from the **difference** of each `tvec` against the
+  `tvec` of the origin frame.
 
-Kalimat yang aman untuk naskah/repo: kalibrasi kamera menghasilkan **intrinsik (K) dan
-koefisien distorsi (D)**; posisi diperoleh **per frame** melalui `solvePnP` dan dinyatakan
-**relatif** terhadap frame awal.
+A safe sentence for the manuscript/repo: camera calibration yields the **intrinsics (K) and
+distortion coefficients (D)**; the position is obtained **per frame** through `solvePnP` and
+expressed **relative** to the initial frame.
 
-## 6. Anomali & pertanyaan terbuka
+## 6. Anomalies & open questions
 
-1. `dataset_kalibrasi_fix_prime_260` hanya berisi **10 gambar** walau namanya menyiratkan 260,
-   padahal notebook memakainya sebagai `FOLDER_PATH`.
-2. `dataset_kalibrasi_ditambah` (97 file, pola `oriy/fwd/bck`) — dipakai untuk bagian mana?
-   Kandidat: `PLOT_GABUNGAN_X_DITAMBAHDATASET.png`, `JALUR_DATASET_DITAMBAH_01.csv`.
-3. FPS tidak konsisten di `capturedatasetbiasa.py`: baris 29 minta 60 FPS, baris 109
-   `VideoWriter` 120.0 FPS. Tidak berdampak (tombol `g` tidak dipakai) tapi perlu dibetulkan
-   sebelum rilis.
-4. Overlay layar di kedua skrip capture menulis `"REC 120FPS"` secara hardcode.
+1. `dataset_kalibrasi_fix_prime_260` contains only **10 images** even though its name implies 260,
+   yet the notebook uses it as `FOLDER_PATH`.
+2. `dataset_kalibrasi_ditambah` (97 files, `oriy/fwd/bck` pattern) — which part uses it?
+   Candidates: `PLOT_GABUNGAN_X_DITAMBAHDATASET.png`, `JALUR_DATASET_DITAMBAH_01.csv`.
+3. Inconsistent FPS in `capturedatasetbiasa.py`: line 29 requests 60 FPS, line 109's
+   `VideoWriter` uses 120.0 FPS. No impact (the `g` key is unused) but it should be fixed
+   before release.
+4. The on-screen overlay in both capture scripts writes `"REC 120FPS"` as a hardcoded string.
 
-## 7. Status seluruh file
+## 7. Status of all files
 
-| # | File | Status | Peran |
+| # | File | Status | Role |
 |---|---|---|---|
-| 17 | `capturedatasetbiasa.py` | terkonfirmasi | Akuisisi citra papan catur untuk kalibrasi kamera (tombol `f`) |
-| 16 | `otomasikalibrasi.py` | terkonfirmasi | Akuisisi dataset pengujian linear (baseline / setelah kalibrasi / measurement error) |
-| 15 | `otomasilintasan.py` | terkonfirmasi | Jalankan lintasan elips + rekam video; parameter baseline dan terkalibrasi |
-| 9 | `kalibrasicamera\virtualencodervideo copy 2.ipynb` | terkonfirmasi | Video lintasan terkalibrasi -> `JALUR_VIDEO_FINAL_3_XX.csv` |
-| 1 | `kalibrasicamera\kalibrasisesuaipaper.ipynb` | terkonfirmasi | Dipecah jadi `kalibrasi_kamera.ipynb` + `kalibrasi_mesin.ipynb` |
-| 2 | `kalibrasicamera\virtualencodervideo.ipynb` | terkonfirmasi | Virtual encoder (video -> lintasan) |
-| 11 | `kalibrasicamera\evaluasilintasan.ipynb` | terkonfirmasi | Evaluasi RMSE lintasan vs ground truth |
-| 18 | `capturedatasetpengujianfoto.py` | belum dipakai (dugaan) | Akuisisi triplet `oriy/fwd/bck`; tapi penulis menyebut `otomasikalibrasi.py` yang dipakai |
-| — | `After Lulus Paper/code/plotmeasurement.py` | terkonfirmasi | Perbandingan dial gauge vs virtual encoder (measurement error). Dipindahkan ke `06_measurement_error/plot_measurement_error.py` |
-| — | `Semester 8/.../images/Hasil/Kalibrator_x`, `Kalibrator_y` | terkonfirmasi | 15 foto dial gauge per sumbu (5 triplet `ori/fwd/bck`) untuk eksperimen measurement error |
-| — | 22 file lainnya | belum | Menunggu penunjukan penulis |
+| 17 | `capturedatasetbiasa.py` | confirmed | Chessboard image acquisition for camera calibration (`f` key) |
+| 16 | `otomasikalibrasi.py` | confirmed | Linear test dataset acquisition (baseline / after calibration / measurement error) |
+| 15 | `otomasilintasan.py` | confirmed | Run the elliptical trajectory + record video; baseline and calibrated parameters |
+| 9 | `kalibrasicamera\virtualencodervideo copy 2.ipynb` | confirmed | Calibrated trajectory video -> `JALUR_VIDEO_FINAL_3_XX.csv` |
+| 1 | `kalibrasicamera\kalibrasisesuaipaper.ipynb` | confirmed | Split into `camera_calibration.ipynb` + `machine_calibration.ipynb` |
+| 2 | `kalibrasicamera\virtualencodervideo.ipynb` | confirmed | Virtual encoder (video -> trajectory) |
+| 11 | `kalibrasicamera\evaluasilintasan.ipynb` | confirmed | Trajectory RMSE evaluation vs ground truth |
+| 18 | `capturedatasetpengujianfoto.py` | not used (suspected) | `oriy/fwd/bck` triplet acquisition; but the author cites `otomasikalibrasi.py` as the one used |
+| — | `After Lulus Paper/code/plotmeasurement.py` | confirmed | Dial gauge vs virtual encoder comparison (measurement error). Moved to `06_measurement_error/plot_measurement_error.py` |
+| — | `Semester 8/.../images/Hasil/Kalibrator_x`, `Kalibrator_y` | confirmed | 15 dial gauge photos per axis (5 `ori/fwd/bck` triplets) for the measurement error experiment |
+| — | 22 other files | pending | Awaiting author identification |
 
-## 8. Catatan: dua jalur CSV lintasan dari satu skrip
+## 8. Note: two trajectory-CSV paths from one script
 
-Sisi **terkalibrasi** (`JALUR_VIDEO_FINAL_3_XX.csv`) jelas dihasilkan
-`virtualencodervideo copy 2.ipynb` sel 6. Sisi **baseline**
-(`hasil_fix_banget_baseline_XX.csv`) menurut pemilik penelitian dihasilkan oleh
-**kode yang sama**, hanya berbeda video masukan dan path CSV keluaran.
+The **calibrated** side (`JALUR_VIDEO_FINAL_3_XX.csv`) is clearly produced by
+`virtualencodervideo copy 2.ipynb` cell 6. The **baseline** side
+(`hasil_fix_banget_baseline_XX.csv`), according to the research owner, is produced by the
+**same code**, differing only in the input video and the output CSV path.
 
-Pencarian ke seluruh notebook di `SEMPRO/Code/` mengonfirmasi tidak ada notebook lain
-yang **menulis** nama `hasil_fix_banget_baseline_*` — semuanya hanya membacanya.
-Jadi penjelasan tersebut konsisten dengan kode; yang tidak tersimpan hanyalah versi
-skrip dengan path keluaran yang sudah diubah.
+A search across all notebooks in `SEMPRO/Code/` confirms that no other notebook
+**writes** the name `hasil_fix_banget_baseline_*` — they all only read it.
+So that explanation is consistent with the code; the only thing not saved is the version
+of the script with the modified output path.
 
-Di repo ini keduanya disatukan lewat `config_paths.py`: `KALIBRASI_VIDEO`
-(folder video) + `KALIBRASI_CSV_PREFIX` (nama berkas CSV keluaran).
+In this repo the two are unified through `config_paths.py`: `KALIBRASI_VIDEO`
+(video folder) + `KALIBRASI_CSV_PREFIX` (output CSV file name).

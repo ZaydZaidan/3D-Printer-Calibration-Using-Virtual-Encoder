@@ -1,96 +1,96 @@
-# Audit & Rencana Penataan Kode
+# Code Audit & Cleanup Plan
 
-Sumber: `Semester 7/SEMPRO/Code/kalibrasicamera` (+ beberapa file .py di `Code/`).
-Tanggal audit: 12 Oktober 2026.
+Source: `Semester 7/SEMPRO/Code/kalibrasicamera` (+ a few .py files in `Code/`).
+Audit date: 12 October 2026.
 
-## 1. Notebook yang Dipakai (final)
+## 1. Notebooks Used (final)
 
-| File sumber | Ukuran | Jumlah sel | Catatan |
+| Source file | Size | Cell count | Note |
 |---|---|---|---|
-| `kalibrasicamera/kalibrasisesuaipaper.ipynb` | 3.4 MB | 12 | Implementasi pipeline sesuai paper + rekomendasi firmware X & Y |
-| `kalibrasicamera/virtualencodervideo.ipynb` | 766 KB | 12 | Kalibrasi kamera (duplikat) + virtual encoder & plot |
-| `kalibrasicamera/evaluasilintasan.ipynb` | 40 KB | 5 | Ground truth elips + RMSE baseline vs kalibrasi |
+| `kalibrasicamera/kalibrasisesuaipaper.ipynb` | 3.4 MB | 12 | Paper-aligned pipeline implementation + X & Y firmware recommendations |
+| `kalibrasicamera/virtualencodervideo.ipynb` | 766 KB | 12 | Camera calibration (duplicate) + virtual encoder & plots |
+| `kalibrasicamera/evaluasilintasan.ipynb` | 40 KB | 5 | Ellipse ground truth + RMSE baseline vs calibrated |
 
-### Notebook lain di folder `Code/` (bukan inti, tapi terkait)
+### Other notebooks in the `Code/` folder (not core, but related)
 
-- `KALIBRASI_SESUAI_PAPER_DAN_VIRTUALENCODER_FOTO.ipynb` — versi berbasis foto (bukan video)
-- `VIRTUALENCODER_VIDEOPROCESSING.ipynb` — versi lebih awal dari virtual encoder video
-- `virtualencodervideo copy.ipynb`, `copy 2/3/4.ipynb` — salinan eksperimen
-- `tulispaper_kalibrasi.ipynb` — notebook penulisan naskah
+- `KALIBRASI_SESUAI_PAPER_DAN_VIRTUALENCODER_FOTO.ipynb` — photo-based version (not video)
+- `VIRTUALENCODER_VIDEOPROCESSING.ipynb` — an earlier version of the video virtual encoder
+- `virtualencodervideo copy.ipynb`, `copy 2/3/4.ipynb` — experiment copies
+- `tulispaper_kalibrasi.ipynb` — manuscript-writing notebook
 - `animasiplot.ipynb`, `datalintasan.ipynb`, `regresibaseline.ipynb`, `debuggingcirle.ipynb`, `CLAHEdanGAUSSIANBLUR.IPYNB`
-- Skrip utilitas: `virtualencoder.py`, `otomasikalibrasi.py`, `otomasilintasan.py`,
+- Utility scripts: `virtualencoder.py`, `otomasikalibrasi.py`, `otomasilintasan.py`,
   `capturedatasetbiasa.py`, `capturedatasetpengujianfoto.py`, `linescreeningparameter.py`,
   `distorsikamera.py`, `distorsikameravisualisasisim.py`, `cekfps.py`, `plotpergerakancapturedata.py`,
   `alasantetatidaksimetris.py`, `Chessboard_generator.py`, `jalaninrepetierhost.py`
 
-Keputusan yang perlu diambil: mana yang ikut ke repo publik, mana yang diarsipkan.
+Decision to make: which ones go into the public repo, which are archived.
 
-## 2. Masalah yang Ditemukan
+## 2. Issues Found
 
-### 2.1 Path absolut hardcoded (paling menghambat)
-Setiap notebook memakai path `C:\Users\zaydz\Documents\Onedrive Kuliah\...` secara literal,
-minimal di titik berikut:
+### 2.1 Hardcoded absolute paths (biggest blocker)
+Every notebook uses the path `C:\Users\zaydz\Documents\Onedrive Kuliah\...` literally,
+at least at the following points:
 
-- `FOLDER_PATH` dataset kalibrasi
-- `base_path` dataset `X_LAST_FIX` / `Y_LAST_FIX` (triplet oriy/fwd/bck)
-- `base_path` cari noise
+- `FOLDER_PATH` calibration dataset
+- `base_path` of the `X_LAST_FIX` / `Y_LAST_FIX` dataset (oriy/fwd/bck triplet)
+- `base_path` noise search
 - `VIDEO_PATH` (`KALIBRASI_X_VIDEO_BENERAN\video\pose_video_XX.avi`)
-- `filename_csv` di notebook evaluasi (`DATA FIX\hasil_fix_banget_baseline_XX.csv`, `JALUR_VIDEO_FINAL_3_XX.csv`)
-- `output_plot_name` (folder `HASIL_KALIBRASI_JALUR_FIX_EVALUASI`, `HASIL_PENGUJIAN_LINTASAN`)
-- `TARGET_FOLDER` pada `cek_frame_folder`
+- `filename_csv` in the evaluation notebook (`DATA FIX\hasil_fix_banget_baseline_XX.csv`, `JALUR_VIDEO_FINAL_3_XX.csv`)
+- `output_plot_name` (`HASIL_KALIBRASI_JALUR_FIX_EVALUASI`, `HASIL_PENGUJIAN_LINTASAN` folders)
+- `TARGET_FOLDER` in `cek_frame_folder`
 
-**Perbaikan:** tarik ke satu sel konfigurasi (`PROJECT_ROOT`, `DATA_DIR`, `OUTPUT_DIR`)
-atau file `config.py`/`.env`, lalu dokumentasikan struktur folder yang diharapkan di README.
+**Fix:** move them into a single configuration cell (`PROJECT_ROOT`, `DATA_DIR`, `OUTPUT_DIR`)
+or a `config.py`/`.env` file, then document the expected folder structure in the README.
 
-### 2.2 Duplikasi blok kode
-- Sel kalibrasi kamera (0-5) di `kalibrasisesuaipaper.ipynb` **sama persis** dengan
-  sel 0-5 di `virtualencodervideo.ipynb`.
-- `calibrateCamera` + perhitungan RMSE juga ditulis dua kali (sel 5 dan komentar "Cell 7").
-- Sel 8 dan sel 9 di notebook 1 hampir identik (X vs Y), hanya beda target, steps/mm,
-  `base_path`, dan nama file visualisasi.
-- Notebook 3: sel 0 dan sel 1 hampir identik (baseline vs kalibrasi), sel 4 menggabungkan keduanya.
+### 2.2 Duplicated code blocks
+- The camera-calibration cells (0-5) in `kalibrasisesuaipaper.ipynb` are **exactly the same** as
+  cells 0-5 in `virtualencodervideo.ipynb`.
+- `calibrateCamera` + the RMSE computation are also written twice (cell 5 and the comment "Cell 7").
+- Cells 8 and 9 in notebook 1 are nearly identical (X vs Y), differing only in target, steps/mm,
+  `base_path`, and the visualization file name.
+- Notebook 3: cells 0 and 1 are nearly identical (baseline vs calibration), cell 4 merges the two.
 
-**Perbaikan:** jadikan satu modul `src/` (mis. `pipeline.py`: `detect_corners`, `calibrate_camera`,
-`pose_from_image`, `evaluate_path`), lalu notebook hanya mengimpor. Ini juga langsung
-menjawab permintaan "code rapi" untuk repo GitHub.
+**Fix:** turn them into a single `src/` module (e.g. `pipeline.py`: `detect_corners`, `calibrate_camera`,
+`pose_from_image`, `evaluate_path`), then have the notebooks just import it. This also directly
+answers the "clean code" requirement for the GitHub repo.
 
-### 2.3 Output notebook membengkak
-`kalibrasisesuaipaper.ipynb` 3.4 MB karena gambar tersimpan di output sel.
-Untuk repo, jalankan **Clear All Outputs** sebelum commit, dan simpan gambar
-hasil eksekusi ke `figures/` saja.
+### 2.3 Bloated notebook output
+`kalibrasisesuaipaper.ipynb` is 3.4 MB because images are stored in the cell outputs.
+For the repo, run **Clear All Outputs** before committing, and save execution-output images
+only to `figures/`.
 
-### 2.4 Baris mati / komentar ganda
-- Blok `cv2.putText` versi "font kekecilan" masih ada dalam bentuk komentar panjang
-  di sel 8 notebook 1.
-- `FILE_INDICES = [1,2,3,4,5,6,7,8,9,10]` langsung ditimpa `FILE_INDICES = [1,2,3]`
-  di sel 6 notebook 2 (nilai efektif hanya 3 video).
-- `sample_idx = 0 if len(image_files) > 7 else 0` (dua cabang nilainya sama).
-- `try/except` telanjang (`except:`) di `intersect_lines` dan `optimize_subpixel_gradient`.
+### 2.4 Dead lines / duplicate comments
+- The `cv2.putText` block from the "font too small" version still exists as a long comment
+  in cell 8 of notebook 1.
+- `FILE_INDICES = [1,2,3,4,5,6,7,8,9,10]` is immediately overwritten by `FILE_INDICES = [1,2,3]`
+  in cell 6 of notebook 2 (the effective value is only 3 videos).
+- `sample_idx = 0 if len(image_files) > 7 else 0` (both branches give the same value).
+- Bare `try/except` (`except:`) in `intersect_lines` and `optimize_subpixel_gradient`.
 
-### 2.5 Dependensi tidak didokumentasikan
-Wajib: `opencv-contrib-python` (untuk `cv2.ximgproc`), `numpy`, `scipy`, `pandas`, `matplotlib`.
-Belum ada `requirements.txt`. Versi OpenCV juga memengaruhi kestabilan deteksi,
-sebaiknya dipin (pin) di requirements.
+### 2.5 Undocumented dependencies
+Required: `opencv-contrib-python` (for `cv2.ximgproc`), `numpy`, `scipy`, `pandas`, `matplotlib`.
+There is no `requirements.txt` yet. The OpenCV version also affects detection stability,
+so it should be pinned in requirements.
 
-### 2.6 Belum ada berkas repo standar
-Belum ada `LICENSE`, `.gitignore`, dan README. `.gif` animasi berukuran 15-23 MB
-sebaiknya **tidak** ikut git (atau lewat Git LFS), karena membengkakkan histori.
+### 2.6 No standard repo files yet
+There is no `LICENSE`, `.gitignore`, or README yet. Animated `.gif` files of 15-23 MB
+should **not** be committed to git (or should go through Git LFS), because they bloat the history.
 
-## 3. Usulan Urutan Pengerjaan
+## 3. Proposed Work Order
 
-1. Salin 3 notebook final + CSV kecil ke struktur folder ini (tanpa dataset besar).
-2. Ekstrak blok berulang menjadi `src/` (`pipeline.py`, `evaluate.py`, `plot.py`).
-3. Ganti semua path absolut dengan konfigurasi relatif + `config.py`.
-4. Hapus baris mati, ganti `except:` telanjang dengan penanganan eksplisit.
-5. Clear notebook outputs, simpan gambar ke `figures/`.
-6. Tambah `requirements.txt`, `LICENSE`, `.gitignore`, dan perbaiki README dengan hasil
-   angka final (RMSE kalibrasi kamera, RMSE lintasan baseline vs kalibrasi, persen perbaikan).
-7. Tentukan mana file di `Code/` yang ikut repo dan mana yang ke `archive/` atau `.gitignore`.
-8. `git init` di folder ini (bukan di dalam OneDrive lama), commit, lalu push ke GitHub.
+1. Copy the 3 final notebooks + the small CSVs into this folder structure (without the large datasets).
+2. Extract the repeated blocks into `src/` (`pipeline.py`, `evaluate.py`, `plot.py`).
+3. Replace all absolute paths with relative configuration + `config.py`.
+4. Remove dead lines, replace the bare `except:` with explicit handling.
+5. Clear notebook outputs, save images to `figures/`.
+6. Add `requirements.txt`, `LICENSE`, `.gitignore`, and update the README with the final numbers
+   (camera-calibration RMSE, trajectory RMSE baseline vs calibrated, percentage improvement).
+7. Decide which files in `Code/` go into the repo and which go to `archive/` or `.gitignore`.
+8. `git init` in this folder (not inside the old OneDrive), commit, then push to GitHub.
 
-## 4. Yang Masih Perlu Diisi (belum ada di kode)
+## 4. What Still Needs Filling In (not yet in the code)
 
-Beberapa angka hasil akhir tidak tertulis di kode (hanya muncul sebagai print output
-saat dijalankan): nilai K, D, RMSE reprojection keseluruhan, RMSE lintasan per trial,
-dan persen perbaikan. Angka-angka ini perlu diambil dari naskah atau dengan menjalankan
-ulang notebook memakai dataset, supaya bisa ditampilkan di README repo.
+Several final numbers are not written in the code (they only appear as print output
+when run): the K and D values, the overall reprojection RMSE, the per-trial trajectory RMSE,
+and the percentage improvement. These numbers need to be taken from the manuscript or by
+re-running the notebooks with the dataset, so that they can be shown in the repo README.

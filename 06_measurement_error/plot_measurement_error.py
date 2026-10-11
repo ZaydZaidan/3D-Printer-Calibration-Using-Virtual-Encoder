@@ -1,14 +1,15 @@
-"""Perbandingan Dial Gauge vs Virtual Encoder (measurement error).
+"""Dial Gauge vs Virtual Encoder comparison (measurement error).
 
-Skrip asli: `After Lulus Paper/code/plotmeasurement.py`. Logika plot tidak diubah;
-yang berubah hanya sumber data (kini dibaca dari CSV) dan tujuan berkas keluaran
-(kini ke `figures/`). Nilai pengukurannya SAMA PERSIS dengan skrip asli.
+Original script: `After Lulus Paper/code/plotmeasurement.py`. The plotting logic is
+unchanged; only the data source (now read from CSV) and the output file destination
+(now to `figures/`) changed. The measurement values are EXACTLY THE SAME as the
+original script.
 
-Cara pakai:
+Usage:
     python 06_measurement_error/plot_measurement_error.py
 
-Masukan : data/processed/measurement_error/dial_vs_ve.csv
-Keluaran: figures/1_4_position_comparison_combined.png (+ .pdf) dan tabel MAE di layar.
+Input  : data/processed/measurement_error/dial_vs_ve.csv
+Output : figures/1_4_position_comparison_combined.png (+ .pdf) and the MAE table on screen.
 """
 
 import os
@@ -18,18 +19,18 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-# --- konfigurasi path terpusat ---
+# --- centralized path configuration ---
 _p = os.path.abspath(os.path.dirname(__file__))
 while not os.path.isfile(os.path.join(_p, "config_paths.py")):
     _parent = os.path.dirname(_p)
     if _parent == _p:
-        raise FileNotFoundError("config_paths.py tidak ditemukan di atas folder ini.")
+        raise FileNotFoundError("config_paths.py was not found above this folder.")
     _p = _parent
 sys.path.insert(0, _p)
 import config_paths as CFG  # noqa: E402
 
 # ==========================================
-# 1. KONFIGURASI FONT & GAYA GRAFIK (IEEE)
+# 1. FONT & PLOT STYLE CONFIGURATION (IEEE)
 # ==========================================
 plt.rcParams.update({
     'font.family': 'serif',
@@ -49,7 +50,7 @@ CSV_PATH = os.path.join(CFG.OUTPUT_DIR, "measurement_error", "dial_vs_ve.csv")
 df = pd.read_csv(CSV_PATH)
 
 # ==========================================
-# 2. SUSUN 4 PANEL DARI CSV
+# 2. BUILD THE 4 PANELS FROM CSV
 # ==========================================
 PANEL_ORDER = [("X", "forward"), ("Y", "forward"), ("X", "backward"), ("Y", "backward")]
 TITLES = {("X", "forward"):  "X Forward Frame Position",
@@ -81,13 +82,13 @@ color_ve = '#1B9E77'
 color_mean = '#7570B3'  # Purple (Mean Line)
 
 # ==========================================
-# 3. GENERASI SINGLE FIGURE (2x2 SUBPLOTS)
+# 3. SINGLE FIGURE GENERATION (2x2 SUBPLOTS)
 # ==========================================
 fig, axes = plt.subplots(2, 2, figsize=(8.5, 7.0), layout='constrained')
 axes_flat = axes.flatten()
 
 combined_abs_diffs = {'X': [], 'Y': []}
-print(f"Masukan: {CSV_PATH}\n")
+print(f"Input: {CSV_PATH}\n")
 print(f"{'panel':22s} {'MAE (µm)':>9s} {'std (µm)':>9s} {'n':>3s}")
 print("-" * 46)
 
@@ -129,7 +130,7 @@ for i, p in enumerate(plots_data):
 print("-" * 46)
 for axis in ('X', 'Y'):
     d = np.array(combined_abs_diffs[axis])
-    print(f"{'Gabungan ' + axis:22s} {d.mean():9.2f} {d.std(ddof=1):9.2f} {len(d):3d}")
+    print(f"{'Combined ' + axis:22s} {d.mean():9.2f} {d.std(ddof=1):9.2f} {len(d):3d}")
 print()
 
 fig.suptitle('Dial Gauge vs. Virtual Encoder Position Comparison',
@@ -140,6 +141,6 @@ png = os.path.join(CFG.FIG_DIR, '1_4_position_comparison_combined.png')
 pdf = os.path.join(CFG.FIG_DIR, '1_4_position_comparison_combined.pdf')
 fig.savefig(png, dpi=300, bbox_inches='tight')
 fig.savefig(pdf, bbox_inches='tight')
-print(f"Gambar disimpan: {png}")
+print(f"Figure saved: {png}")
 print(f"                 {pdf}")
 plt.show()

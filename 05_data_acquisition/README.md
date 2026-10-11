@@ -1,32 +1,33 @@
-# 05 — Skrip Akuisisi (butuh mesin & kamera)
+# 05 — Acquisition Scripts (requires machine & camera)
 
-Skrip di folder ini **hanya bisa dijalankan dengan perangkat keras**: 3D printer yang
-tersambung serial + kamera. Skrip ini **mengisi** `data/raw/`, bukan mengolahnya.
-Isinya sama dengan kode penelitian asli (tidak diubah isinya, hanya nama berkas).
+The scripts in this folder **can only be run with hardware**: a 3D printer connected
+over serial + a camera. These scripts **populate** `data/raw/`, they do not process it.
+Their contents are identical to the original research code (contents unchanged, only the
+file names).
 
-| Berkas | Peran | Baris yang WAJIB disesuaikan |
+| File | Role | Lines that MUST be adjusted |
 |---|---|---|
-| `buat_papan_catur.py` | Cetak papan kalibrasi A4 (8x8 kotak 20 mm + 3 lingkaran penanda) | - |
-| `capture_kalibrasi_kamera.py` | Ambil citra papan catur untuk kalibrasi kamera (tombol `f`) | baris 23 `cv2.VideoCapture(1)` (indeks kamera), baris 29 FPS, baris 41 eksposur |
-| `otomasi_pengujian_linear.py` | Pergerakan linear `oriy`/`fwd`/`bck` 40x untuk kalibrasi mesin | baris 19 `PORT` (mis. `COM10`), baris 21-26 `BACKLASH`/`SKEW_FACTOR`/`STEPX`/`STEPY`, baris 30 `TEST_MODE` |
-| `otomasi_lintasan_elips.py` | Jalankan lintasan elips + rekam video | baris 12 `PORT`, baris 15-21 parameter kalibrasi, baris 23 `TOTAL_ITERASI`, baris 322 indeks kamera |
+| `generate_chessboard.py` | Print the A4 calibration board (8x8 squares of 20 mm + 3 marker circles) | - |
+| `capture_camera_calibration.py` | Capture chessboard images for camera calibration (`f` key) | line 23 `cv2.VideoCapture(1)` (camera index), line 29 FPS, line 41 exposure |
+| `automated_linear_test.py` | `oriy`/`fwd`/`bck` linear movement 40x for machine calibration | line 19 `PORT` (e.g. `COM10`), lines 21-26 `BACKLASH`/`SKEW_FACTOR`/`STEPX`/`STEPY`, line 30 `TEST_MODE` |
+| `automated_ellipse_path.py` | Run the ellipse path + record video | line 12 `PORT`, lines 15-21 calibration parameters, line 23 `TOTAL_ITERASI`, line 322 camera index |
 
-Prasyarat mesin:
+Machine prerequisites:
 
-- Firmware RepRap/Marlin yang menerima `M92`, `M425`, `M852`, `G28`, `G1`, `M400`, `G4`.
-- Kamera **monokrom** 1280x720 (penelitian memakai OV9281). Skrip memaksa grayscale.
-- Eksposur dikunci manual (`AUTO_EXPOSURE=1`, `EXPOSURE=-7`) agar pencahayaan stabil.
+- RepRap/Marlin firmware that accepts `M92`, `M425`, `M852`, `G28`, `G1`, `M400`, `G4`.
+- **Monochrome** 1280x720 camera (the research used OV9281). The scripts force grayscale.
+- Exposure locked manually (`AUTO_EXPOSURE=1`, `EXPOSURE=-7`) so lighting stays stable.
 
-Alur akuisisi per sesi:
+Acquisition flow per session:
 
 ```
-capture_kalibrasi_kamera.py   -> dataset_sesi_<timestamp>/kalibrasi/calib_XXXX.png
-otomasi_pengujian_linear.py   -> dataset_<Xpos|Xneg|Ypos|Yneg>_sesi_<ts>/kalibrasi/oriy,fwd,bck{i}.png
-otomasi_lintasan_elips.py     -> dataset_otomatis_sesi_<timestamp>/video/pose_video_XX.avi
+capture_camera_calibration.py   -> dataset_sesi_<timestamp>/kalibrasi/calib_XXXX.png
+automated_linear_test.py        -> dataset_<Xpos|Xneg|Ypos|Yneg>_sesi_<ts>/kalibrasi/oriy,fwd,bck{i}.png
+automated_ellipse_path.py       -> dataset_otomatis_sesi_<timestamp>/video/pose_video_XX.avi
 ```
 
-Setelah selesai, pindahkan hasilnya ke `data/raw/` sesuai `data/MANIFEST.md`.
+When finished, move the results to `data/raw/` according to `data/MANIFEST.md`.
 
-> Skrip `otomasi_pengujian_linear.py` asli memakai jarak gerak **10 mm** untuk mode
-> `X-`/`Y-` dan **0.5 mm** untuk mode `X+`/`Y+` (yang terakhir dipakai untuk eksperimen
-> measurement error / dial gauge).
+> The original `automated_linear_test.py` script used a travel distance of **10 mm** for
+> modes `X-`/`Y-` and **0.5 mm** for modes `X+`/`Y+` (the latter is used for the
+> measurement error / dial gauge experiment).

@@ -6,8 +6,7 @@ single camera and a chessboard target as a *virtual encoder*. The result is vali
 running an elliptical toolpath and measuring the deviation from ground truth.
 
 > **Start here:** [`docs/00_handoff_guide.md`](docs/00_handoff_guide.md) - a step-by-step handoff
-> guide with the expected output of every stage. *(The `docs/` files are written in
-> Indonesian; the code, this README, and all outputs are in English.)*
+> guide with the expected output of every stage.
 
 ---
 
@@ -64,7 +63,7 @@ the ±10 µm resolution of the dial indicator itself.
                      |
                      v
  [2] MACHINE calibration (per-axis linear test)
-     Dataset from otomasi_pengujian_linear.py, starting parameters 80/80/0/0
+     Dataset from automated_linear_test.py, starting parameters 80/80/0/0
      -> solvePnP per image -> dX/dY, backlash, skew
      -> firmware recommendations M92 (steps/mm), M425 (backlash), M852 (skew)
                      |
@@ -174,7 +173,7 @@ Folder Rapih Code & Data Thesis/
 |  \- processed/                    <- output of each stage (in git)
 |- figures/                         <- figures for the manuscript
 \- docs/
-   |- 00_handoff_guide.md                 <- HANDOFF GUIDE (start here; Indonesian)
+   |- 00_handoff_guide.md                 <- HANDOFF GUIDE (start here)
    |- 01_code_audit.md              <- audit of the original code + cleanup plan
    |- 02_file_roles.md              <- role of every research file
    \- 03_results_and_data_locations.md   <- result numbers and data locations

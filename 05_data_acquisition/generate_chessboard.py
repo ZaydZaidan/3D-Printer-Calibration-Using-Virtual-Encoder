@@ -1,27 +1,27 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle, Circle
 
-# 1. Setup Ukuran Kertas A4 dalam milimeter
+# 1. Set up A4 paper size in millimeters
 a4_w, a4_h = 210, 297
 
-# Membuat figure dengan rasio fisik A4 dan resolusi 600 DPI
+# Create the figure with A4 physical ratio and 600 DPI resolution
 fig = plt.figure(figsize=(a4_w / 25.4, a4_h / 25.4), dpi=600)
 ax = fig.add_axes([0, 0, 1, 1])
 ax.set_xlim(0, a4_w)
 ax.set_ylim(0, a4_h)
 ax.axis('off')
 
-# 2. Spesifikasi Grid Catur (Diperbesar agar memenuhi A4)
-sq_size = 20 # Ukuran satu kotak diperbesar menjadi 20 mm (2 cm)
+# 2. Chessboard Grid Specification (enlarged to fill A4)
+sq_size = 20 # Each square enlarged to 20 mm (2 cm)
 rows, cols = 8, 8
 grid_w = cols * sq_size
 grid_h = rows * sq_size
 
-# Titik tengah kertas A4
+# Center point of the A4 paper
 cx, cy = a4_w / 2, a4_h / 2
 
-# 3. Menggambar Margin Hitam
-margin = 15 # Lebar margin hitam = 15 mm
+# 3. Draw the Black Margin
+margin = 15 # Black margin width = 15 mm
 marker_w = grid_w + 2 * margin
 marker_h = grid_h + 2 * margin
 
@@ -31,7 +31,7 @@ ax.add_patch(Rectangle(
     facecolor='black', edgecolor='none'
 ))
 
-# 4. Menggambar Grid Catur 8x8
+# 4. Draw the 8x8 Chessboard Grid
 start_x = cx - grid_w / 2
 start_y = cy - grid_h / 2
 
@@ -44,26 +44,26 @@ for r in range(rows):
             facecolor=color, edgecolor='none'
         ))
 
-# 5. Menambahkan Lingkaran Penanda (Proporsional dengan kotak)
-# Radius lingkaran = 1/4 dari ukuran kotak (berarti diameter = 1/2 ukuran kotak)
+# 5. Add Marker Circles (proportional to the square)
+# Circle radius = 1/4 of the square size (so diameter = 1/2 the square size)
 radius = sq_size / 4 
 
 def get_center(r, c):
     return (start_x + c * sq_size + sq_size / 2, 
             start_y + r * sq_size + sq_size / 2)
 
-# Lingkaran Origin (Baris 3, Kolom 4) 
+# Origin Circle (Row 3, Column 4) 
 ax.add_patch(Circle(get_center(3, 4), radius, facecolor='white', edgecolor='none'))
 
-# Lingkaran Sumbu X (Baris 3, Kolom 6) 
+# X-Axis Circle (Row 3, Column 6) 
 ax.add_patch(Circle(get_center(3, 6), radius, facecolor='white', edgecolor='none'))
 
-# Lingkaran Sumbu Y (Baris 4, Kolom 4) 
+# Y-Axis Circle (Row 4, Column 4) 
 ax.add_patch(Circle(get_center(4, 4), radius, facecolor='black', edgecolor='none'))
 
-# 6. Menyimpan Hasil
+# 6. Save the Result
 plt.savefig('chessboard_marker_A4_Large.pdf', format='pdf')
 plt.savefig('chessboard_marker_A4_Large.png', format='png', dpi=600)
 
 plt.close()
-print("Berhasil membuat file chessboard_marker_A4_Large berukuran maksimal!")
+print("Successfully created the maximum-size chessboard_marker_A4_Large file!")
