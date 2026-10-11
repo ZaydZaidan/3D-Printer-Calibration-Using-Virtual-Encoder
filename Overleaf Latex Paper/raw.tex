@@ -1,0 +1,363 @@
+% update 17/04/2024
+\documentclass[journal]{IEEEtran}
+%\include{preamble_paper}
+\usepackage{cite}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx,caption}
+\usepackage{epstopdf}
+
+\usepackage{subcaption}
+\usepackage[demo]{graphicx}
+%\newtheorem{definition}{Definition}
+%\setlength{\parindent}{2em}
+
+\usepackage{epsfig,epsf,graphicx,graphics}
+\usepackage{url}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{bm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage[table,xcdraw]{xcolor}
+
+
+\newtheorem{lemma}{Lemma}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{proposition}{Proposition}[section]
+\newtheorem{corollary}{Corollary}[section]
+%\newtheorem{definition}{Definition}[section]
+\newtheorem{remark}{Remark}[section]
+\newtheorem{claim}{Claim}[section]
+\newtheorem{fact}{Fact}[section]
+\newtheorem{example}{Example}[section]
+\newtheorem{conj}{Conjecture}[section]
+
+\newcommand{\SNR}{\mathsf{SNR}}
+\newcommand{\INR}{\mathsf{INR}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+%\newcommand{\Pr}{\mathrm{Pr}}
+\newcommand{\sym}{\mathrm{sym}}
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\jg}{\mathrm{J.G.}}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\Id}{\mathbf{I}}
+\newcommand{\Zero}{\mathbf{0}}
+\newcommand{\eqFunc}{\overset{\mathrm{f}}{=}}
+\newcommand{\C}{\mcal{C}}
+\newcommand{\G}{\mathrm{G}}
+\newcommand{\BE}{\mathrm{BE}}
+\newcommand{\uplink}{\mathrm{ul}}
+\newcommand{\downlink}{\mathrm{dl}}
+\newcommand{\Out}{\mathrm{out}}
+\newcommand{\Inn}{\mathrm{in}}
+
+\newcommand{\aaaa}{\mathrm{(a)}}
+\newcommand{\bbbb}{\mathrm{(b)}}
+\newcommand{\cccc}{\mathrm{(c)}}
+\newcommand{\dddd}{\mathrm{(d)}}
+\newcommand{\eeee}{\mathrm{(e)}}
+\newcommand{\ffff}{\mathrm{(f)}}
+\newcommand{\gggg}{\mathrm{(g)}}
+\newcommand{\hhhh}{\mathrm{(h)}}
+\newcommand{\iiii}{\mathrm{(i)}}
+\newcommand{\jjjj}{\mathrm{(j)}}
+\newcommand{\kkkk}{\mathrm{(k)}}
+\newcommand{\llll}{\mathrm{(l)}}
+\newcommand{\mmmm}{\mathrm{(m)}}
+\newcommand{\nnnn}{\mathrm{(n)}}
+\newcommand{\oooo}{\mathrm{(o)}}
+\newcommand{\pppp}{\mathrm{(p)}}
+\newcommand{\qqqq}{\mathrm{(q)}}
+\newcommand{\rrrr}{\mathrm{(r)}}
+\newcommand{\ssss}{\mathrm{(s)}}
+\newcommand{\tttt}{\mathrm{(t)}}
+%%%%%%%%%%%%%%%%%%%%%%%
+\title{Enhancing Indoor Localization Accuracy with Adaptive K-Means Refinement}
+
+
+\author{
+\IEEEauthorblockN{Asif~Ali~Zamzami,~\IEEEmembership{Member,~IEEE}, Rafina~Destiarti~Ainul, Mahmoud~Elsisi,~\IEEEmembership{Senior Member,~IEEE}}
+\thanks{Manuscript received xxxx; revised xxxx; accepted
+xxxx. Date of publication xxxx; date of current
+version xxxx. 
+The associate editor coordinating the review of this article and approving it for publication was xxxx
+}
+\thanks{Asif Ali Zamzami is affiliated with the Department of Robotics and Artificial Intellegence Engineering, Universitas Airlangga, Surabaya, Indonesia (asif.ali@ftmm.unair.ac.id).}
+\thanks{Rafina Destiarti Ainul is with the Department of Electrical Engineering, Universitas Surabaya, Surabaya, Indonesia (e-mail: rafina@staff.ubaya.ac.id).}
+\thanks{Mahmoud Elsisi is with the Department of Electrical Engineering, National Kaohsiung University of Science and Technology. (e-mail: mahmoudelsisi@nkust.edu.tw).}
+}
+
+\begin{document}
+\maketitle
+
+
+\begin{abstract}
+Indoor localization in wireless sensor network (WSN) is challenging, as conventional trilateration using received signal strength indicator (RSSI) is highly sensitive to signal fluctuations. Weighted centroid localization (WCL) improves trilateration by reducing distance error sensitivity, and Enhanced WCL further improves WCL with adaptive weighting against RSSI instability. However, both still struggle in practical indoor environments. This paper proposes K-Means Gaussian Refinement (KMGR), which integrates K-Means clustering and Gaussian perturbation for more accurate estimates. Experiments with Zigbee devices achieve 76.04\% accuracy, with only 0.06 m error and 1.95 m MSE, outperforming both WCL and Enhanced WCL.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Indoor Localization, Adaptive Tracking, Wireless Sensor Networks
+\end{IEEEkeywords}
+
+
+\IEEEpeerreviewmaketitle
+
+\section{Introduction}
+
+
+\IEEEPARstart{W}{ireless} sensor network (WSN) has become a cornerstone for numerous indoor applications, especially in industrial settings where precise localization of automated guided vehicle (AGV) is critical for efficient navigation \cite{robust}. In our increasingly interconnected world, the need for reliable location-based services (LBS) has surged, linking people and devices within heterogeneous networks such as the Internet of Vehicles (IoV) and the industrial Internet of Things (IIoT). The rise of autonomous systems, smart factories, and intelligent manufacturing has further amplified the importance and commercial relevance of accurate LBS~\cite{robot}.
+
+While satellite-based systems can deliver high-precision positioning outdoors, their performance indoors are severely limited by signal blockage and multipath propagation. This limitation has spurred the development of sensor-based indoor localization approaches, including ultra-wide band (UWB) \cite{uwb}, Wireless Fidelity (WiFi) techniques such as WiFi fingerprint-based localization (WFL) \cite{adversarial}, bluetooth, and 5G-enabled methods \cite{stopping}. More advanced solutions leverage wavelet transforms and deep convolutional neural networks (CNNs) to process RSSI signals as two-dimensional data, enhancing robustness and accuracy in complex indoor environments \cite{robust}. These advancements have fueled growing interest in model-based indoor positioning systems (IPSs), which estimate distances between mobile unknown node and anchor nodes based on RSSI measurements \cite{adaptive}.
+
+
+
+
+In range-based positioning, trilateration estimates the location of a target by finding the intersection of circles centered at anchor nodes, where each circle’s distance is obtained from RSSI measurements~\cite{trilat}.
+However, if the scheme is non-adaptive, such as trilateration, it requires converting RSSI to distance through a path-loss model, which depends on environment-specific parameters that need recalibration for every deployment~\cite{adaptive}. In addition, the decoding method may also need to be adjusted, particularly when short information packets are transmitted, as these conditions can further decrease error-correcting performance~\cite{trapping}.
+
+To avoid explicit distance estimation, weighted centroid localization (WCL) computes a weighted average of anchor node coordinates using processed RSSI values~\cite{hybrid}. This method reduces reliance on path-loss modeling but still suffers from RSSI instability and bias caused by fixed RSSI–distance mapping. 
+To address these limitations, an Enhanced WCL method was developed by incorporating the different estimation distance (DED) approach~\cite{hybrid,adaptive}. DED quantifies inconsistencies in RSSI-derived distance estimations across anchor nodes, allowing unreliable anchor nodes to be down-weighted and stable ones to contribute more significantly. This adaptive adjustment improves robustness and accuracy while preserving the simplicity of centroid-based estimation.
+
+Although Enhanced WCL achieves better accuracy, it still treats each measurement independently, which can result in scattered or unstable position estimates, especially in dynamic environments. To overcome this limitation, we propose the K-Means Gaussian refinement (KMGR) method. KMGR refines the initial Enhanced WCL results through clustering and Gaussian-based smoothing, producing more spatially consistent and accurate localization outcomes. Experimental results show that KMGR improves accuracy by 76.04\%, achieving an average position error of only 0.06 m and the smallest mean squared error (MSE) of 1.95 m. Compared to Enhanced WCL, KMGR reduces the MSE by 0.38 m, making it suitable for real-time indoor tracking.
+
+The remainder of this paper is organized as follows. Section~\ref{problem} presents the preliminaries and problem formulation. Section~\ref{proposed} details the proposed KMGR framework.  Section~\ref{simulation} discusses the numerical results. Finally, Section~\ref{conclusion} concludes the paper.
+
+
+\section{Preliminaries and Problem Formulation}
+\label{problem}
+
+We consider a receiver-centric RSSI-based localization system operating in a two-dimensional indoor environment. The system consists of a set of static anchor nodes and a single mobile unknown node that moves along a predefined path with several observation points.
+
+\subsection{RSSI-based Distance Estimation}
+
+Let us consider a network of anchor nodes, where the set of anchor nodes and their corresponding indices are defined as
+\[
+\mathcal{A} = \{a_1, a_2, \ldots, a_m\}, \quad j = 1, \dots, m,
+\]
+with each anchor node having known coordinates $(x^a_j, y^a_j)$. These anchor nodes periodically broadcast signals that are received by the unknown node, allowing it to estimate its position without requiring any additional ranging hardware. The unknown node at observation point $\ell$ is denoted as $u_{\ell}$, where $\ell = 1, \dots, N$. At each observation point $\ell$, the unknown node selects a subset $\mathcal{S}_\ell \subseteq \mathcal{A}$ consisting of anchor nodes with the strongest RSSI values. For instance, if three anchor nodes are chosen, the unknown node uses the three highest RSSI, i.e., $|\mathcal{S}_{\ell}| = 3$ at each observation point $\ell$.
+
+The distance between the unknown node at observation point $\ell$ and anchor node $a_j \in \mathcal{S}_{\ell}$ is estimated from the measured RSSI, denoted as $P_{\ell,j}$, using the log-distance path-loss model. Here, $P_0$ is the RSSI (in dBm) at a reference distance $d_0$, and $\eta$ is the path-loss exponent that characterizes signal attenuation in the environment. By inverting the model, the distance to the $a_j$ anchor node is estimated as
+\[
+d_{\ell,j} = 10^{\frac{P_0 - P_{\ell,j}}{10\eta}}.
+\]
+These distance estimations provide a more reliable input for the WCL correction stage compared to using raw RSSI values directly.
+
+
+%%%%%%%%%%%%
+
+\subsection{Weighted Centroid Localization}
+\label{wcl}
+
+To address the reduced accuracy of trilateration with wireless signals~\cite{trilat} in indoor environments, mainly caused by multipath propagation and RSSI fluctuations, the WCL method has been employed~\cite{hybrid}.
+WCL determines the position of an unknown node by calculating the weighted average of the anchor node coordinates, with weights assigned according to the corresponding RSSI.
+
+At each observation point $\ell$, the WCL position estimate $(\hat{x}_{\ell}, \hat{y}_{\ell})$ is given by
+\begin{equation}
+\hat{x}_{\ell} = \frac{\sum_{j}^{|\mathcal{S}_\ell|} x^a_{\ell,j} \, w_{\ell, j}}{\sum_{j}^{|\mathcal{S}_\ell|} w_{\ell, j}}, \quad
+\hat{y}_{\ell} = \frac{\sum_{j}^{|\mathcal{S}_\ell|} y^a_{\ell,j} \, w_{\ell, j}}{\sum_{j}^{|\mathcal{S}_\ell|} w_{\ell, j}},
+\end{equation}
+where $(x^a_{\ell,j}, y^a_{\ell,j})$ represents the coordinates of anchor node $a_j$ detected at observation point $\ell$.
+
+The localization error at each observation point $\ell$ can then be quantified as the Euclidean distance
+\begin{equation}
+\label{eq:mse_wcl}
+MSE_{\ell}^{\text{WCL}} = \sqrt{\bigl(\hat{x}_\ell - x_\ell^u \bigr)^2 + \bigl(\hat{y}_\ell - y_\ell^u \bigr)^2},
+\end{equation}
+where $(x_\ell^u, y_\ell^u)$ denotes the ground truth coordinates of the unknown node at observation point $\ell$.
+
+WCL provides robustness against signal variability and reduces reliance on precise distance estimation. Nevertheless, its accuracy can still be affected by environmental factors, requiring calibration for each deployment.
+
+\subsection{Enhanced Weighted Centroid Localization}
+\label{Enhanced WCL}
+
+To improve the localization accuracy of WCL described in Section~\ref{wcl}, the DED refinement stage~\cite{hybrid,adaptive} is introduced to compensate for inconsistencies in distance estimates derived from RSSI measurements. When integrated with WCL, this refinement is referred to as Enhanced WCL.
+
+In the DED stage, each selected anchor node $a_j \in \mathcal{S}_\ell$ is assigned a weight $w_j$ to reflect its relative contribution to the position estimate as follows:
+\begin{equation}
+\label{weighti}
+w_j = \frac{1}{\sum_{g=1,\, g \neq j}^{k} d_{\ell,g}},
+\end{equation}
+where $g$ indexes the other anchor nodes in the selected subset $\mathcal{S}_\ell$, $d_{\ell,g}$ is the estimated distance from the unknown node to anchor node $a_g$, and $k=|\mathcal{S}_\ell|$ is the maximum number of anchor nodes detected at observation point $\ell$.
+
+A normalization factor ensures consistent combined contributions from all anchor nodes:
+\begin{equation}
+\label{normal}
+w_{\text{norm}} = B \sum_{g=1}^{k} \frac{1}{d_{\ell,g}},
+\end{equation}
+where $B$ is an environment-dependent calibration constant.  
+
+Using these weights, the DED-refined position at observation point $\ell$ is calculated as
+\begin{equation}
+\label{hasil}
+(\hat{x}_\ell^{DED}, \hat{y}_\ell^{DED}) 
+= \frac{\sum_{j=1}^{k} (x^a_{\ell,j}, y^a_{\ell,j}) \, w_j}{w_{\text{norm}}}.
+\end{equation}
+
+To further refine this estimate, Enhanced WCL introduces a correction vector $\boldsymbol{\phi}_\ell$ that adjusts the DED estimate based on relative distance differences and inverse-distance weighting:
+\begin{equation}
+\boldsymbol{\phi}_\ell = (\hat{x}_\ell^{DED}, \hat{y}_\ell^{DED})
+\cdot \left[
+\sum_{g=1}^{k} \sum_{\substack{j=1 \\ j \neq g}}^{k} \frac{d_{\ell,j} - d_{\ell,g}}{k} 
++ \sum_{j=1}^{k} \frac{1}{(d_{\ell,j})^\alpha}
+\right],
+\end{equation}
+with a normalization term defined to scale the correction vector appropriately:
+\begin{equation}
+\Phi_\ell = \sum_{g=1}^{k} \sum_{\substack{j=1 \\ j \neq g}}^{k} \frac{d_{\ell,j} - d_{\ell,g}}{k} 
++ \sum_{g=1}^{k} \frac{1}{(d_{\ell,g})^\alpha},
+\end{equation}
+where $\alpha$ controls how rapidly the weights decay with distance.  
+
+The final refined estimate is then obtained as:
+\begin{equation}
+\label{delapan}
+(\hat{x}_\ell', \hat{y}_\ell') = \frac{\boldsymbol{\phi}_\ell}{\Phi_\ell}.
+\end{equation}
+
+By combining DED weighting with the correction vector, Enhanced WCL reduces the impact of inconsistent distance estimates and improves localization stability in noisy indoor environments.
+
+The localization accuracy at each observation point $\ell$ is measured by the MSE:
+\begin{equation}
+\label{MSE}
+MSE_{\ell}^{\text{EWCL}} = \sqrt{(x^u_\ell - \hat{x}_\ell')^2 + (y^u_\ell - \hat{y}_\ell')^2},
+\end{equation}
+
+
+To evaluate performance across all $N$ observation points, the cumulative distribution function (CDF) of the MSE is computed as:
+\begin{equation}
+F(x) = \frac{1}{N} \sum_{\ell=1}^{N} 1_{[\mathrm{MSE}_\ell \leq x]},
+\end{equation}
+where $1_{[\cdot]}$ is the indicator function.  
+This representation provides a statistical basis for comparing different localization methods.
+
+
+%%%%%%%%%%%% start here
+\section{Proposed K-Means Gaussian Refinement}
+\label{proposed}
+
+
+
+\begin{algorithm}[t]
+\begin{algorithmic}[1]
+\caption{K-Means Gaussian Refinement (KMGR)}
+\label{alg:kmgr}
+\State \textbf{Input}: Enhanced WCL estimates from \eqref{delapan} and ground truth positions $\{(x_\ell^u, y_\ell^u)\}_{\ell=1}^N$;
+\State Perform K-Means clustering to form $k_c$ clusters and compute cluster centers using \eqref{eq:centroid}; %Line 2
+\State Assign each Enhanced WCL estimate to the nearest cluster using \eqref{eq:distance}; %Line 3
+\State Compute $\sigma_x$ and $\sigma_y$ of the estimates; %Line 4
+\State \, \textbf{For} each observation point $\ell$ \textbf{do}
+  \State \, \, Sample Gaussian noise from distributions \eqref{eq:gaussian}; %Line 6
+  \State \, \, Generate a refined position using \eqref{eq:refined}; %Line 7
+  \State \, \, Evaluate localization error using \eqref{eq:mse_kmgr}; %Line 8
+\State \, \textbf{End} for
+\State \textbf{Output}: Refined positions \eqref{eq:refined} and associated error metrics \eqref{eq:mse_kmgr};
+\end{algorithmic}
+\end{algorithm}
+
+This work builds upon the Enhanced WCL method~\cite{hybrid,adaptive} in Section \ref{Enhanced WCL} by integrating K-Means clustering, following prior studies that enhanced localization accuracy through clustering of RSSI-based fingerprints or anchor node estimates. Clustering reduces computational load and improves positioning reliability by grouping similar signal patterns before refinement~\cite{centroid}. K-Means was chosen for its simplicity, efficiency, and ability to minimize within-cluster variance, making it well-suited for grouping spatially coherent Enhanced WCL estimates.
+
+The KMGR process detailed in Algorithm~\ref{alg:kmgr} proceeds as follows. 
+The input consists of the Enhanced WCL estimates 
+$\{(\hat{x}_\ell', \hat{y}_\ell')\}_{\ell=1}^N$ from \eqref{delapan} and their corresponding ground truth positions $\{(x_\ell^u, y_\ell^u)\}_{\ell=1}^N$. 
+In Line~2, K-Means clustering groups these noisy estimates into $k_c$ clusters. 
+For notational convenience, when referring to elements inside a cluster, we write 
+$(\hat{x}_i', \hat{y}_i')$ with $i \in S_q$, where $S_q$ denotes the set of indices of estimates assigned to cluster $q = 1, \ldots, k_c$ and each $i$ corresponds to some $\ell$ in the global index set $\{1,\dots,N\}$. 
+The cluster center is then updated according to
+\begin{equation}
+\label{eq:centroid}
+(\bar{x}_q, \bar{y}_q) = \frac{1}{|S_q|} \sum_{i \in S_q} (\hat{x}_i', \hat{y}_i'),
+\end{equation}
+
+
+In Line 3, each estimate is assigned to its nearest cluster by minimizing the Euclidean distance:
+\begin{equation}
+\label{eq:distance}
+z_\ell = \arg\min_{q} \left\| \begin{pmatrix} \hat{x}_\ell' \\ \hat{y}_\ell' \end{pmatrix} - \begin{pmatrix} \bar{x}_q \\ \bar{y}_q \end{pmatrix} \right\|_2.
+\end{equation}
+
+Line 4 computes the standard deviations $\sigma_x$ and $\sigma_y$, quantifying the spread of the Enhanced WCL estimates along each axis. These values are then used in Line 6 to generate Gaussian perturbations as follows,
+\begin{equation}
+\label{eq:gaussian}
+\varepsilon_x \sim \mathcal{N}(0, \sigma_x), \quad
+\varepsilon_y \sim \mathcal{N}(0, \sigma_y).
+\end{equation}
+
+For each observation point $\ell$, Line 7 refines the position by combining the assigned cluster center with Gaussian noise:
+\begin{equation}
+\label{eq:refined}
+(\hat{x}_\ell^\text{r}, \hat{y}_\ell^\text{r}) = 
+\begin{pmatrix} \bar{x}_{z_\ell} + \varepsilon_x \\ \bar{y}_{z_\ell} + \varepsilon_y \end{pmatrix}.
+\end{equation}
+
+Finally, using the refined position $(\hat{x}_\ell^\text{r}, \hat{y}_\ell^\text{r})$ from \eqref{eq:refined}, Line 8 computes the localization error by comparing it to the ground truth $(x_\ell^u, y_\ell^u)$. The MSE for each observation point $\ell$ is thus calculated as
+\begin{equation}
+\label{eq:mse_kmgr}
+MSE_{\ell}^{\text{KMGR}}= \sqrt{(x_\ell^u - \hat{x}_\ell^\text{r})^2 + (y_\ell^u - \hat{y}_\ell^\text{r})^2}.
+\end{equation}
+
+
+By clustering the Enhanced WCL estimates (Lines 2–3), KMGR captures spatial coherence and reduces variance, while the Gaussian perturbation (Lines 6–7) reintroduces realistic variability. Together, these steps yield smoother and more robust position estimates than Enhanced WCL alone.
+
+
+\section{Numerical Results}
+\label{simulation}
+
+The proposed KMGR localization scheme was evaluated using Zigbee devices in an indoor environment on the second floor of a building measuring 54 m $\times$ 57.4 m. While the first floor is primarily an open lobby, the second floor contains multiple rooms and corridors, providing a more challenging and realistic testbed for indoor localization. The normalization factor in \eqref{normal} was set to $B=0.328$, which was empirically determined by training the Enhanced WCL method in the same environment.  
+
+A total of 18 anchor nodes were installed along the walls at a height of 2.4 meters with 7-meter spacing. The mobile unknown node followed a predefined trajectory covering $N=53$ observation points at a height of 0.9 meters. Figure \ref{eepis} illustrates the route of the mobile unknown node as well as the anchor nodes placements. During the experiment, the unknown node measured RSSI signals from anchor nodes within a 10-meter range. As it moved along its path, the active anchor node set automatically shifted to the nearest anchor nodes, ensuring continuous data collection across all observation points.  
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=8.5cm]{final_last_figure2}
+\caption{\centering Trajectory of the mobile unknown node and anchor nodes in the indoor localization environment}
+\label{eepis}
+\end{figure}  
+
+Figure \ref{cdf3} shows the CDF of the localization error MSE. All algorithms eventually reach a probability of 1, meaning every error is below a certain threshold. WCL has the largest maximum error at 8 m, while Enhanced WCL reduces it to 6.2 m. KMGR achieves the best result, keeping all errors within 5 m and showing higher accuracy and reliability compared to WCL and Enhanced WCL.
+
+\begin{figure}[h]
+\includegraphics[width=8cm]{final_cdf}
+\caption{\centering CDF of $MSE_{\ell}$ for different localization methods}
+\label{cdf3}
+\end{figure}  
+
+Further comparison is shown in Figure \ref{paretoo}, which presents a Pareto chart of average MSE and localization accuracy. KMGR achieved the lowest average MSE of 1.95 meters with an accuracy of 76.64\%. Enhanced WCL showed a slightly higher average error (by 0.38 meters), while WCL had the poorest performance among the three. These findings highlight the advantage of combining clustering with Gaussian refinement, as they reduce fluctuations and yield smoother and more reliable localization results.  
+
+\begin{figure}[h]
+\includegraphics[width=8cm]{final_pareto}
+\caption{\centering Pareto chart comparing localization accuracy and $MSE_{\ell}$ across different algorithms}
+\label{paretoo}
+\end{figure}  
+
+The improved accuracy of KMGR can be attributed to two key mechanisms. First, the K-Means clustering step identifies spatially consistent groups of Enhanced WCL estimates, thereby mitigating the effect of scattered or noisy measurements. Second, the Gaussian perturbation step smooths the trajectories by compensating for signal fluctuations, reducing abrupt jumps in estimated positions. Together, these steps produce more stable and precise localization outcomes.  
+
+In addition, KMGR operates directly on Enhanced WCL estimates without requiring environment-specific calibration, making it lightweight and suitable for real-time deployment. Overall, KMGR not only reduces MSE compared to Enhanced WCL but also improves robustness against noise and outliers, making it highly effective for indoor environments with obstacles and multipath propagation.
+
+
+\section{Conclusion}
+\label{conclusion}
+
+Both WCL and Enhanced WCL can estimate unknown node positions but often fail to provide reliable mapping in corridor environments, particularly when anchor nodes are distant, leading to large deviations from the true trajectory. KMGR addressed this issue by refining position estimates through clustering, achieving higher robustness and stability. Experiments with Zigbee devices demonstrated that WCL and Enhanced WCL often failed to map the unknown node’s trajectory in corridor environments, especially with distant anchor nodes, resulting in significant errors. KMGR successfully refined position estimates, achieving up to 76.04\% accuracy with only 0.06 m error and 1.95 m MSE, improving MSE by 0.38 m compared to Enhanced WCL.
+
+
+
+
+%\section*{Acknowledgment} The authors would like to thank Saleem for valuable discussions.
+
+
+\ifCLASSOPTIONcaptionsoff
+  \newpage
+\fi
+
+
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,Bibliography}
+
+
+\vfill
+
+\end{document} 

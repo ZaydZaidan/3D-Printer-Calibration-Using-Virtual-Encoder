@@ -1,0 +1,83 @@
+% update 17/04/2026
+\documentclass[journal]{IEEEtran}
+\usepackage{cite}
+\usepackage{amsmath,amsfonts,amssymb}
+\usepackage{graphicx,caption}
+\usepackage{epstopdf}
+\usepackage{subcaption}
+\usepackage{url}
+\usepackage{color}
+\usepackage{colortbl}
+\usepackage{multirow}
+\usepackage{bm}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{booktabs}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{booktabs}
+\usepackage{tabularx}
+\usepackage{array}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
+
+\newcommand{\SNR}{\mathsf{SNR}}
+\newcommand{\INR}{\mathsf{INR}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Var}{\mathrm{Var}}
+\newcommand{\Cov}{\mathrm{Cov}}
+\newcommand{\sym}{\mathrm{sym}}
+\newcommand{\conv}{\mathrm{conv}}
+\newcommand{\jg}{\mathrm{J.G.}}
+\newcommand{\rank}{\mathrm{rank}}
+\newcommand{\Id}{\mathbf{I}}
+\newcommand{\Zero}{\mathbf{0}}
+\newcommand{\figref}[1]{Fig.~\ref{#1}}
+\newcommand{\tabref}[1]{Table~\ref{#1}}
+
+\title{Pose Estimation and EDLines Algorithm Based Virtual Encoder for XY Axis Calibration of a 3-Axis 3D Printer}
+
+\author{
+Zayd Zihni Zaidan,~\IEEEmembership{Member,~IEEE},
+Sylmina Dalily Alkaff,
+Aqilah Baseri Huddin,
+Hanim Hussin,
+Asif Ali Zamzami,~\IEEEmembership{Member,~IEEE}
+and Bahrudin
+%
+\thanks{Manuscript received xxx; revised xxx; accepted xxx. Date of publication xxx; date of current version xxx. (\textit{Corresponding author: Asif Ali Zamzami.})}
+%
+\thanks{Zayd Zihni Zaidan, Sylmina Dalily Alkaff, and Asif Ali Zamzami are with the Department of Robotics and Artificial Intelligence Engineering, Faculty of Advanced Technology and Multidiscipline, Universitas Airlangga, Surabaya 60115, Indonesia (e-mail: zayd.zihni.zaidan-2022@ftmm.unair.ac.id; sylmina.dalily.a@ftmm.unair.ac.id; asif.ali@ftmm.unair.ac.id).}
+%
+\thanks{Aqilah Baseri Huddin is with the Department of Electrical, Electronic and Systems Engineering, Faculty of Engineering and Built Environment, Universiti Kebangsaan Malaysia, Bangi 43600, Selangor, Malaysia (e-mail: aqilah@ukm.edu.my).}
+%
+\thanks{Hanim Hussin is with the Faculty of Electrical Engineering, Universiti Teknologi MARA, 40450 Shah Alam, Selangor, Malaysia (e-mail: hanimh@uitm.edu.my).}
+
+\thanks{Bahrudin is with the Biomechatronics Research Group, Research Center for Intelligent Mechatronics, National Research and Innovation Agency (BRIN), Indonesia. (e-mail: bahr03@brin.go.id).}
+}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+In the era of Industry 4.0, virtual manufacturing paradigms are increasingly leveraged to optimize manual production and inspection processes. For desktop 3D printers, calibration shifts caused by mechanical wear over extended operating periods introduce severe geometric inaccuracies. Traditional calibration approaches rely heavily on mechanical dial gauges, which are inherently limited by human error, restricted dimensionality, and low time efficiency. Although automated alternatives have been proposed, they frequently encounter trade-offs between cost and spatial accuracy. To overcome these limitations, this study presents a highly accurate, precise, and cost-effective machine vision-based virtual encoder system designed for XY-axis calibration. The system incorporates a custom chessboard marker, a sub-pixel corner detection pipeline utilizing the Edge Drawing Lines (EDLines) algorithm, and a Levenberg-Marquardt-driven Perspective-n-Point (SolvePnP) solver to dynamically convert camera pixel displacements into micrometer-scale physical positions. The system enables comprehensive error profiling and real-time compensation for axis steps per millimeter, structural backlash, and axis skewness. Experimental validation recorded an internal measurement error below 7~$\mu$m ($3.55~\mu$m for the X-axis and $6.25~\mu$m for the Y-axis), operating under a maximum environmental noise threshold of 4.9~$\mu$m. Linear axis calibration yielded post-compensation errors within 5.4--7.1~$\mu$m, representing an accuracy enhancement of 84.6\% and 90.2\% for the X and Y axes, respectively. Furthermore, simultaneous tracking evaluations along complex eliptic test trajectories demonstrated a 54.24\% reduction in total tracking error, decreasing the root-mean-square error (RMSE) from 100.9~$\mu$m to 46.17~$\mu$m. The system successfully mitigated baseline trajectory deviations by more than half, establishing the virtual encoder as a highly viable, low-cost ($<$ 30 USD) alternative for precision desktop metrology.
+\end{abstract}
+
+\begin{IEEEkeywords}
+Virtual Encoder, Machine Vision, 3D Printer Calibration, Edge Drawing Lines, Chessboard Marker.
+\end{IEEEkeywords}
+
+\IEEEpeerreviewmaketitle
+
+% --- INCLUSION SECTION MATTERS ---
+\input{sections/01_introduction}
+\input{sections/02_system_architecture}
+\input{sections/03_proposed_system}
+\input{sections/04_mathematical_preliminaries}
+\input{sections/05_experimental_methodology}
+\input{sections/06_experimental_results}
+\input{sections/07_conclusion}
+
+% --- BIBLIOGRAPHY ---
+\bibliographystyle{IEEEtran}
+\bibliography{IEEEabrv,Bibliography}
+
+\end{document}

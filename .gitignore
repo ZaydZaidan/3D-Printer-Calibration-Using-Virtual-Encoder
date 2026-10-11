@@ -29,3 +29,14 @@ desktop.ini
 .DS_Store
 .vscode/
 .idea/
+
+# LaTeX build artifacts (the paper folder is inside this repo)
+*.aux
+*.log
+*.out
+*.toc
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+*.blg
+*.bbl
