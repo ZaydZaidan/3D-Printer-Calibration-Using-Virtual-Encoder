@@ -16,7 +16,7 @@ running an elliptical toolpath and measuring the deviation from ground truth.
 
 | Metric | Baseline | After calibration | Improvement |
 |---|---|---|---|
-| X axis error | 0.0463 mm | 0.0071 mm | 84.7 % |
+| X axis error | 0.0463 mm | 0.0071 mm | 84.6 % |
 | Y axis error | 0.0550 mm | 0.0054 mm | 90.2 % |
 | Y drift while moving X | 0.0937 mm | 0.0043 mm | 95.4 % |
 | X drift while moving Y | 0.0898 mm | 0.0036 mm | 96.0 % |
@@ -138,15 +138,21 @@ Expected contents, useful for checking that nothing is missing after downloading
 | `linear_calibrated_x` | 120 | 22.4 MB |
 | `linear_calibrated_y` | 120 | 21.4 MB |
 | `measurement_error` | 361 | 68.2 MB |
-| `video_baseline_x` | 21 | 1016 MB |
-| `video_calibrated_x` | 11 | 573 MB |
-| `video_kalibrasi_x` | 3 | 104 MB |
+| `noise_static_capture` | 24 | 4.2 MB |
+| `video_baseline_x` | 21 | 1016.0 MB |
 | `video_baseline_y` | 1 | 35.6 MB |
+| `video_calibrated_x` | 11 | 573.1 MB |
 | `video_calibrated_y` | 1 | 38.9 MB |
-| **Total** | **1038** | **1956 MB** |
+| `video_kalibrasi_x` | 3 | 104.2 MB |
+| **Total** | **1062** | **1960 MB** |
 
 `measurement_error` holds six subfolders: `x/y_machine_movement` (120 + 120),
 `x/y_camera_calibration` (54 + 31), and `x/y_dial_gauge` (18 + 18 dial indicator photos).
+
+`noise_static_capture` holds the 24 stills of the stationary capture sequence described in
+[`data/MANIFEST.md`](data/MANIFEST.md) section 3.1. It is needed by
+`07_paper_figures/verify_environmental_noise.py`, which re-derives the environmental-noise
+figure from the raw images.
 
 The mapping between the original folder names in the thesis and the names used here is in
 [`data/MANIFEST.md`](data/MANIFEST.md).
@@ -168,6 +174,7 @@ Folder Rapih Code & Data Thesis/
 |- 05_data_acquisition/                <- requires the machine and camera
 |- 06_measurement_error/plot_measurement_error.py   <- dial indicator vs virtual encoder
 |- 07_paper_figures/                <- the scripts that draw every paper figure
+|- Overleaf Latex Paper/            <- the manuscript (LaTeX) + REVISION_NOTES.md
 |- data/
 |  |- MANIFEST.md                   <- original folder name -> repo name mapping
 |  |- raw/                          <- raw data + video (1.9 GB, NOT in git)
@@ -201,9 +208,40 @@ the raw stills instead of trusting the hard-coded array, and prints both statist
 side by side. Run it (`python verify_environmental_noise.py`) to audit that figure.
 
 > The three `plot_*.py` files are faithful copies of the author's original plotting code from
-> `After Lulus Paper/code/`: data, labels and layout are untouched — only the comments were
+> `After Lulus Paper/code/`: data, layout and labels are untouched — only the comments were
 > translated and the output folder redirected into the repo. All 14 files in `figures/paper/`
-> were regenerated from these scripts and match the originals pixel for pixel.
+> were regenerated from these scripts (they were pixel-for-pixel identical to the originals at
+> the time of the copy).
+>
+> Two of them were then revised deliberately and no longer match the original renders:
+> `environmental_noise_with_std` (the legend reports the SD of the readout instead of the SD of
+> the absolute deviations) and `1_4_position_comparison_combined` (panel annotation `MAE`
+> instead of `Mean Diff`). Both were re-rendered at 300 dpi. Details in
+> [`Overleaf Latex Paper/REVISION_NOTES.md`](Overleaf%20Latex%20Paper/REVISION_NOTES.md) and
+> `docs/03_results_and_data_locations.md` section 6.
+
+---
+
+## The manuscript
+
+`Overleaf Latex Paper/` is the current manuscript as a self-contained LaTeX project:
+`main_new.tex` (monolithic), `Bibliography.bib`, `IEEEtran.cls`, the eleven figures it includes
+in `images/`, and `main_new.pdf` built from that source. To rebuild the PDF:
+
+```bash
+pdflatex main_new.tex && bibtex main_new && pdflatex main_new.tex && pdflatex main_new.tex
+```
+
+[`REVISION_NOTES.md`](Overleaf%20Latex%20Paper/REVISION_NOTES.md) in the same folder lists every
+value that was checked against the raw data and corrected, with the derivation of each new
+number: the dial-gauge comparison is reported as a mean absolute discrepancy (4.96 / 7.81 µm)
+rather than the magnitude of a mean offset; the stationary-noise numbers use a single definition
+(mean absolute deviation 2.58 / 4.97 µm, SD of the repeated readout 2.63 / 3.44 µm); the
+distortion vector lists all five calibrated coefficients including k3 = -5.0330; and the
+uncertainty budget was rebuilt (u_c 6.23 / 6.79 µm, U 12.46 / 13.57 µm at k = 2).
+
+> The manuscript supersedes the older thesis chapter under `Semester 8/Template_Skripsi_latex/`.
+> Where the two disagree, the manuscript and this repository are authoritative.
 
 ---
 
