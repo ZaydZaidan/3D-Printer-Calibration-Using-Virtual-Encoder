@@ -109,7 +109,7 @@ for i, p in enumerate(plots_data):
             label='Virtual Encoder', zorder=3)
 
     # Mean Line
-    label_stat = f"Mean Diff: {mae:.1f} $\\pm$ {std_diff:.1f} $\\mu$m"
+    label_stat = f"MAE: {mae:.1f} $\\pm$ {std_diff:.1f} $\\mu$m"
     ax.axhline(mean_ve, color=color_mean, linestyle='--', linewidth=1.3,
                label=label_stat, zorder=4)
 
@@ -139,8 +139,8 @@ fig.suptitle('Dial Gauge vs. Virtual Encoder Position Comparison',
 os.makedirs(CFG.FIG_DIR, exist_ok=True)
 png = os.path.join(CFG.PAPER_FIG_DIR, '1_4_position_comparison_combined.png')
 pdf = os.path.join(CFG.PAPER_FIG_DIR, '1_4_position_comparison_combined.pdf')
-fig.savefig(png, dpi=300, bbox_inches='tight')
-fig.savefig(pdf, bbox_inches='tight')
+fig.savefig(png, dpi=300)
+fig.savefig(pdf)
 print(f"Figure saved: {png}")
 print(f"                 {pdf}")
 plt.show()

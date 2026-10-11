@@ -132,6 +132,35 @@ reports no missing database entries.
 ### About the PDF files in this folder
 
 * `main_new.pdf` — compiled from the revised `main_new.tex` (10 pages, bibliography included).
-* `main_prerevision_build.pdf` — the build that shipped inside your zip. It still contains the
-  old numbers (3.55 / 6.25 µm, `u_c` 7.61, `U` 15.22); renamed from `main.pdf` so it cannot be
-  mistaken for the current build. Nothing else was changed; delete it if you no longer need it.
+* `main_prerevision_build.pdf` — the build that shipped inside your zip under the name `main.pdf`.
+  It still contains the old numbers (3.55 / 6.25 µm, `u_c` 7.61, `U` 15.22). It was removed from
+  this folder after verifying it is byte-identical to `main.pdf` inside `Zayd_IEEE.zip`, so it can
+  be restored from that archive if you ever need it.
+
+### Item 16 — the two figures carrying the revised statistics
+
+| Figure | Change |
+|---|---|
+| `images/Noise_Lingkungan.png` | legend now reads `MAE X = 2.58 um, SD = 2.63 um` and `MAE Y = 4.97 um, SD = 3.44 um`. It previously printed `MAE X = 2.58 ± 1.49` where the ± was the SD of the absolute deviations. Regenerated from the same data at 300 dpi (the old file was 100 dpi, below what IEEE production expects for raster art). |
+| `images/1_4_position_comparison_combined.png` | the four panels now annotate `MAE: 4.6 ± 4.3 / 8.5 ± 7.8 / 5.3 ± 2.5 / 7.1 ± 4.9 um` instead of `Mean Diff: ...`, because those values are mean absolute deviations and the text cites the MAE equation. Regenerated at 300 dpi. |
+
+Both were produced with the project's own scripts (`07_paper_figures/plot_environmental_noise.py`
+and `06_measurement_error/plot_measurement_error.py`), so any future re-plot reproduces them.
+
+### Item 17 — cleanup of this folder
+
+Removed: `sections/` (the older split draft, which still held every superseded number),
+`original_main.tex`, `Old_bibliography.tex`, `Bibliography_reduced_backup.bib`,
+`main_prerevision_build.pdf`, the three stray root-level frame images, and the unused artwork
+(`bare_jrnl_new_sample4.pdf`, `New_IEEEtran_how-to.*`, `fig1.png`, `raw.tex`, `cr10v3.jpg`,
+`Chessboard.png`, `Calibration Protocol Fix.drawio.png`, `perbandingan_full_01.png`, the four
+`*_frame_position.png` panels and the two trajectory figures).
+
+Every removed file was first verified byte-identical to an entry inside `Zayd_IEEE.zip`, so all of
+it can be restored by re-extracting that archive; identical copies of `original_main.tex` and
+`Old_bibliography.tex` also remain in `After Lulus Paper/Latex_extracted_2026-10-12/`.
+The trajectory figures are regenerable at any time with
+`python 07_paper_figures/plot_trajectory_rmse.py`.
+
+What remains: `main_new.tex` (the active manuscript), `Bibliography.bib`, `IEEEtran.cls`,
+`images/` (the 11 figures it includes), and the PDF built from this source.

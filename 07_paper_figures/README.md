@@ -6,7 +6,14 @@ are unchanged**. Only the comments were translated to English and each `savefig`
 into `figures/paper/`, so the scripts can be run from anywhere without scattering PNGs around.
 
 Every figure below has been regenerated from these scripts and compared against the original
-files: the PNGs are **pixel-for-pixel identical**.
+files: the PNGs were **pixel-for-pixel identical** when the scripts were first copied over.
+
+> **One deliberate exception.** `plot_environmental_noise.py` was revised afterwards: its legend
+> now reports the standard deviation of the repeated readout (2.63 / 3.44 um) instead of the
+> standard deviation of the absolute deviations (1.49 / 3.40 um), because the SD of folded values
+> is not the dispersion of the measured quantity and it disagreed with both the manuscript text
+> and the uncertainty budget. Data, layout, colours and fonts are unchanged. `figures/paper/`
+> now holds the corrected render.
 
 | Script | Figure(s) written to `figures/paper/` |
 |---|---|

@@ -1,3 +1,11 @@
+"""Environmental-noise figure for the manuscript.
+
+Revision: the legend reports the standard deviation of the repeated readout
+(2.63 / 3.44 um) instead of the standard deviation of the absolute deviations
+(1.49 / 3.40 um). The SD of folded values is not the dispersion of the measured
+quantity, so it disagreed with the uncertainty budget and with the text.
+Data, layout, colours and fonts are unchanged.
+"""
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -33,10 +41,10 @@ abs_err_y = np.abs(delta_y)
 
 # Compute Mean Absolute Error (MAE) and Standard Deviation (SD)
 mae_x = np.mean(abs_err_x)
-std_x = np.std(abs_err_x, ddof=1)  # Sample Standard Deviation
+sd_x = np.std(delta_x, ddof=1)   # SD of the repeated readout itself
 
 mae_y = np.mean(abs_err_y)
-std_y = np.std(abs_err_y, ddof=1)
+sd_y = np.std(delta_y, ddof=1)   # (not of its absolute value, which folds the bias)
 
 color_x = '#1B9E77'  # Teal Green
 color_y = '#D95F02'  # Orange Red
@@ -49,11 +57,11 @@ ax.plot(iterations, abs_err_x, 's-', color=color_x, linewidth=1.4, markersize=6,
 ax.plot(iterations, abs_err_y, 'o-', color=color_y, linewidth=1.4, markersize=6,
         label='Environmental Noise Y-Axis', zorder=3)
 
-# Mean (MAE) line with Standard Deviation (SD)
+# Mean absolute deviation (MAE) line, with the SD of the repeated readout in the label
 ax.axhline(mae_x, color=color_x, linestyle='--', linewidth=1.3,
-           label=f'MAE X = {mae_x:.2f} $\pm$ {std_x:.2f} $\mu$m', zorder=2)
+           label=f'MAE X = {mae_x:.2f} $\mu$m, SD = {sd_x:.2f} $\mu$m', zorder=2)
 ax.axhline(mae_y, color=color_y, linestyle='--', linewidth=1.3,
-           label=f'MAE Y = {mae_y:.2f} $\pm$ {std_y:.2f} $\mu$m', zorder=2)
+           label=f'MAE Y = {mae_y:.2f} $\mu$m, SD = {sd_y:.2f} $\mu$m', zorder=2)
 
 ax.set_xlabel('Iteration')
 ax.set_ylabel('Absolute Error ($\mu$m)')
@@ -65,6 +73,6 @@ ax.grid(True, linestyle=':', alpha=0.5)
 ax.legend(loc='upper right', framealpha=0.95, edgecolor='gray')
 
 # Save figure to vector PDF and high-res PNG files
-fig.savefig(os.path.join(OUT_DIR, 'environmental_noise_with_std.pdf'), bbox_inches='tight')
-fig.savefig(os.path.join(OUT_DIR, 'environmental_noise_with_std.png'), dpi=300, bbox_inches='tight')
+fig.savefig(os.path.join(OUT_DIR, 'environmental_noise_with_std.pdf'))
+fig.savefig(os.path.join(OUT_DIR, 'environmental_noise_with_std.png'), dpi=300)
 plt.show()

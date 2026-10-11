@@ -193,7 +193,7 @@ tables of the thesis and writes into `figures/paper/`:
 |---|---|
 | `07_paper_figures/plot_axis_iterations.py` | `x_axis_iterations`, `y_axis_iterations`, `mae_summary` |
 | `07_paper_figures/plot_trajectory_rmse.py` | `trajectory_rmse_iterations_final`, `trajectory_summary_bars_final` |
-| `07_paper_figures/plot_environmental_noise.py` | `environmental_noise_with_std` |
+| `07_paper_figures/plot_environmental_noise.py` | `environmental_noise_with_std` (legend revised: SD of the readout, not of \|delta\|) |
 | `06_measurement_error/plot_measurement_error.py` | `1_4_position_comparison_combined` |
 
 `07_paper_figures/verify_environmental_noise.py` re-derives the environmental-noise values from

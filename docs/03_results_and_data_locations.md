@@ -294,6 +294,8 @@ Two further notes on the same experiment:
   in the pair list of the original cell (pairs 2 and 9). This is why elements 2 and 9 of both
   plotted arrays are identical.
 
-Nothing was changed inside `plot_environmental_noise.py`: the figure still shows exactly what was
-plotted for the manuscript. Table and figure need to be brought into agreement by the author —
-either report mean(|delta|) in the table, or relabel the table column and update the figure.
+**Resolved in the paper revision.** The manuscript now uses one definition throughout: mean
+absolute readout deviations of 2.58 / 4.97 um (this is what the figure draws) together with the
+standard deviation of the repeated readout, 2.63 / 3.44 um. `plot_environmental_noise.py` was
+updated so its legend shows `MAE = ... , SD = ...` (SD of the readout) and `figures/paper/` holds
+the corrected render; the pre-revision render is still inside `Zayd_IEEE.zip`.
