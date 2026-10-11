@@ -1,0 +1,19 @@
+# Normalisasi line ending: simpan LF di repo, biar diff tidak berisik antar OS.
+* text=auto eol=lf
+
+# Notebook & skrip: teks
+*.ipynb text eol=lf
+*.py    text eol=lf
+*.md    text eol=lf
+*.txt   text eol=lf
+*.csv   text eol=lf
+*.json  text eol=lf
+
+# Berkas biner: jangan disentuh
+*.png  binary
+*.jpg  binary
+*.jpeg binary
+*.pdf  binary
+*.avi  binary
+*.rar  binary
+*.zip  binary

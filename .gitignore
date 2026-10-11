@@ -1,0 +1,31 @@
+# --- Jupyter ---
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# --- Dataset besar (jangan masuk git) ---
+data/raw/
+*.avi
+*.mp4
+*.mov
+*.rar
+*.zip
+*.gif
+
+# Notebook dengan output gambar besar: jaga repo tetap ringan.
+# Hapus baris di bawah bila ingin output ikut ter-commit.
+# *.ipynb
+
+# --- Python ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+*.egg-info/
+
+# --- OS / editor ---
+Thumbs.db
+desktop.ini
+.DS_Store
+.vscode/
+.idea/

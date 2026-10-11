@@ -1,0 +1,8 @@
+# Dependensi proyek kalibrasi 3D printer (virtual encoder)
+# Versi mengikuti environment yang benar-benar dipakai saat penelitian (Python 3.11, Windows)
+
+opencv-contrib-python==4.12.0.88   # WAJIB versi contrib: kode memakai cv2.ximgproc (EdgeDrawing)
+numpy==2.2.6
+scipy==1.17.1
+pandas==3.0.2
+matplotlib==3.10.8
