@@ -90,3 +90,36 @@ Folder `systematic_error_x`, `systematic_error_Y`, `kalibrator_systematic_error_
 `KALIBRASI_X_STEPBACK_1_FIX_METHOD`, `KALIBRASI_Y_STEPBACK_1_FIX_METHOD` semuanya
 punya salinan di `After Lulus Paper/Data/`. **Rujukan final = `After Lulus Paper/Data/`**;
 yang di `Code/` dianggap arsip kerja.
+
+---
+
+## 7. Unduhan data mentah (untuk handoff)
+
+Repo git sengaja **tidak** memuat data mentah yang besar. Unduh lewat tautan berikut,
+lalu taruh isinya sesuai kolom "nama di repo" di atas.
+
+| Paket | Isi | Ukuran | Tautan |
+|---|---|---|---|
+| Video lintasan | 5 folder `video_*` (37 berkas) | 1.7 GB | _isi tautan Google Drive di sini_ |
+| Citra + CSV mentah | `camera_calibration/`, `linear_*`, `measurement_error/`, `circular_*` | 183 MB | _isi tautan di sini bila tidak ikut git_ |
+
+**Cara memakai:** unduh, ekstrak, lalu letakkan isinya **langsung di dalam** `data/raw/`
+sehingga strukturnya menjadi `data/raw/linear_baseline_x/...`,
+`data/raw/video_baseline_x/...`, dan seterusnya. Verifikasi dengan:
+
+```bash
+python config_paths.py
+```
+
+Semua baris harus berstatus `OK`. Kalau ada yang `TIDAK DITEMUKAN`, lokasinya akan
+ditunjukkan di kolom terakhir.
+
+**Cek kelengkapan paket video** (agar tidak ada berkas yang tertinggal saat mengunggah):
+
+| Folder | Nama asli | Harus berisi |
+|---|---|---|
+| `video_baseline_x/` | `BASELINE_JALUR_FINAL_VIDEO` | 21 berkas `pose_video_01..21.avi` |
+| `video_calibrated_x/` | `KALIBRASI_JALUR_FINAL_VIDEO_3` | 11 berkas (`pose_video_01..10.avi` + `pose_video_01 - KALIBRASI.avi`) |
+| `video_kalibrasi_x/` | `KALIBRASI_X_VIDEO_BENERAN` | 3 berkas |
+| `video_baseline_y/` | `BASELINE_Y_VIDEO_FINAL_BGT_BGT` | 1 berkas |
+| `video_calibrated_y/` | `KALIBRASI_Y_VIDEO_FINAL_BGT_BGT` | 1 berkas |
