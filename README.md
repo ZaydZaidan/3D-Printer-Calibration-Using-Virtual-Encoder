@@ -5,6 +5,12 @@ Calibration of the motion axes of a 3D printer (**steps/mm**, **backlash**, and
 single camera and a chessboard target as a *virtual encoder*. The result is validated by
 running an elliptical toolpath and measuring the deviation from ground truth.
 
+Clone:
+
+```bash
+git clone https://github.com/ZaydZaidan/3D-Printer-Calibration-Using-Virtual-Encoder.git
+```
+
 > **Start here:** [`docs/00_handoff_guide.md`](docs/00_handoff_guide.md) - a step-by-step handoff
 > guide with the expected output of every stage.
 
